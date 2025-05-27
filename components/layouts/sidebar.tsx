@@ -104,19 +104,7 @@ const Sidebar = () => {
                     </div>
                     <PerfectScrollbar className="relative h-[calc(100vh-80px)]">
                         <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
-                            <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'analytics' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('/analytics')}>
-                                    <div className="flex items-center">
-                                        <IconMenuDashboard className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('analytics')}</span>
-                                    </div>
-                                </button>
-
-                                <AnimateHeight duration={300} height={currentMenu === 'analytics' ? 'auto' : 0}>
-                                
-                                </AnimateHeight>
-                            </li>
-                            <li className="nav-item">
+                             <li className="nav-item">
                                 <ul>
                                     <li className="nav-item">
                                         <Link href="/apps/chat" className="group">
@@ -126,17 +114,39 @@ const Sidebar = () => {
                                             </div>
                                         </Link>
                                     </li>
-
-                                    <li className="nav-item">
-                                        <Link href="/apps/calendar" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuCalendar className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('calendar')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
                                 </ul>
                             </li>
+                            {/* <li className="nav-item">
+                                <Link href="/apps/calendar" className="group">
+                                    <div className="flex items-center">
+                                        <IconMenuCalendar className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('calendar')}</span>
+                                    </div>
+                                </Link>
+                            </li> */}
+                            <li className="menu nav-item">
+                                {/* <button type="button" className={`${currentMenu === 'analytics' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('analytics')}> */}
+                                                                <Link href="/analytics" className="group">
+
+                                    <div className="flex items-center">
+                                        <IconMenuDashboard className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('analytics')}</span>
+                                    </div>
+                                    </Link>
+                                {/* </button> */}
+
+                                <AnimateHeight duration={300} height={currentMenu === 'analytics' ? 'auto' : 0}></AnimateHeight>
+                            </li>
+                            <li className="nav-item">
+                                <Link href="/apps/contacts" className="group">
+                                    <div className="flex items-center">
+                                        <IconMenuContacts className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('contacts')}</span>
+                                    </div>
+                                </Link>
+                            </li>
+
+                           
                         </ul>
                     </PerfectScrollbar>
                 </div>

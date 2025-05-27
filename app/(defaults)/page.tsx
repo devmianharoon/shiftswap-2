@@ -1,5 +1,6 @@
 // import ComponentsDashboardAnalytics from '@/components/dashboard/components-dashboard-sales';
-import ComponentsDashboardAnalytics from '@/components/dashboard/components-dashboard-analytics';
+import ComponentsAppsCalendar from '@/components/apps/calendar/components-apps-calendar';
+// import ComponentsDashboardAnalytics from '@/components/dashboard/components-dashboard-analytics';
 import { Metadata } from 'next';
 import React from 'react';
 
@@ -8,7 +9,9 @@ export const metadata: Metadata = {
 };
 
 const Sales = () => {
-    return <ComponentsDashboardAnalytics />;
+    // return <ComponentsDashboardAnalytics />;
+        return <ComponentsAppsCalendar />;
+
 };
 
 export default Sales;
