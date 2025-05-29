@@ -10,15 +10,17 @@ const socialLinks = [
   { icon: "uil-youtube", unicode: "\\edb5", color: "#c8312b", href: "#" },
 ];
 
+
+
 export default function Header32({
   parentClass = "relative wrapper !bg-[#fff8ee]",
-  navClass = "navbar navbar-expand-lg center-nav transparent navbar-light",
+  navClass = "flex items-center justify-between w-full  flex-col bg-transparent",
 }) {
   return (
     <header className={parentClass}>
       <nav className={navClass}>
-        <div className="container xl:!flex-row lg:!flex-row !flex-nowrap items-center">
-          <div className="navbar-brand w-full">
+        <div className="mx-auto w-full px-[15px] max-w-[1320px]  flex-col flex  items-center  flex-nowrap">
+          <div className="w-full">
             <Link href={`/`}>
               <Image
                 // srcSet="/assets/img/logo-dark@2x.png 2x"
@@ -29,85 +31,76 @@ export default function Header32({
               />
             </Link>
           </div>
-          <div className="navbar-collapse offcanvas offcanvas-nav offcanvas-start">
-            <div className="offcanvas-header xl:!hidden lg:!hidden flex items-center justify-between flex-row p-6">
-              <h3 className="!text-white xl:!text-[1.5rem] !text-[calc(1.275rem_+_0.3vw)] !mb-0">
+          <div className="w-full lg:w-auto">
+            <div className="flex items-center justify-between lg:hidden p-6">
+              <h3 className="text-white text-2xl mb-0">
                 Sandbox
               </h3>
               <button
                 type="button"
-                className="btn-close btn-close-white !mr-[-0.75rem] m-0 p-0 leading-none !text-[#343f52] transition-all duration-[0.2s] ease-in-out border-0 motion-reduce:transition-none before:text-[1.05rem] before:text-white before:content-['\ed3b'] before:w-[1.8rem] before:h-[1.8rem] before:leading-[1.8rem] before:shadow-none before:transition-[background] before:duration-[0.2s] before:ease-in-out before:!flex before:justify-center before:items-center before:m-0 before:p-0 before:rounded-[100%] hover:no-underline bg-inherit before:bg-[rgba(255,255,255,.08)] before:font-Unicons hover:before:bg-[rgba(0,0,0,.11)]"
+                className="text-[#343f52] transition-all duration-200 ease-in-out border-0 motion-reduce:transition-none hover:no-underline bg-inherit"
                 data-bs-dismiss="offcanvas"
                 aria-label="Close"
               />
             </div>
-            <div className="offcanvas-body xl:!ml-auto lg:!ml-auto flex flex-col !h-full">
-              {/* /.navbar-nav */}
-              <div className="offcanvas-footer xl:!hidden lg:!hidden">
+            <div className="lg:ml-auto flex flex-col h-full">
+              <div className="lg:hidden">
                 <div>
                   <a
                     href="mailto:first.last@email.com"
-                    className="link-inverse"
+                    className="text-inherit hover:text-[#3f78e0]"
                   >
                     info@email.com
                   </a>
                   <br />
                   00 (123) 456 78 90 <br />
-                  <nav className="nav social social-white !mt-4">
+                  <nav className="flex mt-4">
                     {socialLinks.map((elm, i) => (
                       <a
                         key={i}
-                        className="!text-[#cacaca] text-[1rem] transition-all duration-[0.2s] ease-in-out translate-y-0 motion-reduce:transition-none hover:translate-y-[-0.15rem] m-[0_.7rem_0_0]"
+                        className="text-[#cacaca] text-base transition-all duration-200 ease-in-out hover:-translate-y-0.5 mx-[0.7rem_0_0]"
                         href={elm.href}
                       >
                         <i
-                          className={`uil ${elm.icon} before:content-[${elm.unicode}] !text-white text-[1rem]`}
+                          className={`uil ${elm.icon} text-white text-base`}
                         />
                       </a>
                     ))}
                   </nav>
-                  {/* /.social */}
                 </div>
               </div>
-              {/* /.offcanvas-footer */}
             </div>
-            {/* /.offcanvas-body */}
           </div>
-          {/* /.navbar-collapse */}
-          <div className="navbar-other w-full !flex !ml-auto">
-            <ul className="navbar-nav !flex-row !items-center !ml-auto">
-              <li className="nav-item hidden xl:block lg:block md:block">
+          <div className="w-full flex ml-auto">
+            <ul className="flex flex-row items-center ml-auto">
+              <li className="hidden lg:block md:block">
                 <Link
                   href={`/signin`}
-                  className="btn btn-sm btn-primary !text-white !bg-[#3f78e0] border-[#3f78e0] hover:text-white hover:bg-[#3f78e0] hover:!border-[#3f78e0] active:text-white active:bg-[#3f78e0] active:border-[#3f78e0] disabled:text-white disabled:bg-[#3f78e0] disabled:border-[#3f78e0] !rounded-[50rem] hover:translate-y-[-0.15rem] hover:shadow-[0_0.25rem_0.75rem_rgba(30,34,40,0.15)]"
+                  className="inline-block px-5 py-2 text-sm text-white bg-[#3f78e0] border border-[#3f78e0] rounded-full hover:translate-y-[-0.15rem] hover:shadow-lg transition-all duration-200"
                 >
                   Login
                 </Link>
               </li>
-               <li className="nav-item hidden xl:block lg:block md:block">
+              <li className="hidden lg:block md:block">
                 <Link
                   href={`/signup`}
-                  className="btn btn-sm btn-primary !text-white !bg-[#3f78e0] border-[#3f78e0] hover:text-white hover:bg-[#3f78e0] hover:!border-[#3f78e0] active:text-white active:bg-[#3f78e0] active:border-[#3f78e0] disabled:text-white disabled:bg-[#3f78e0] disabled:border-[#3f78e0] !rounded-[50rem] hover:translate-y-[-0.15rem] hover:shadow-[0_0.25rem_0.75rem_rgba(30,34,40,0.15)]"
+                  className="inline-block px-5 py-2 text-sm text-white bg-[#3f78e0] border border-[#3f78e0] rounded-full hover:translate-y-[-0.15rem] hover:shadow-lg transition-all duration-200"
                 >
                   Register
                 </Link>
               </li>
 
-              <li className="nav-item xl:!hidden lg:!hidden">
-                <button className="hamburger offcanvas-nav-btn">
-                  <span />
+              <li className="lg:hidden">
+                <button className="p-2">
+                  <span className="block w-6 h-0.5 bg-current mb-1"></span>
+                  <span className="block w-6 h-0.5 bg-current mb-1"></span>
+                  <span className="block w-6 h-0.5 bg-current"></span>
                 </button>
               </li>
             </ul>
-            {/* /.navbar-nav */}
           </div>
-          {/* /.navbar-other */}
         </div>
-        {/* /.container */}
       </nav>
-      {/* /.navbar */}
-
-      {/* /.offcanvas */}
     </header>
   );
 }
