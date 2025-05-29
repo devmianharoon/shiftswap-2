@@ -323,7 +323,7 @@ export default function Page() {
               {errors.businessType && <p className="text-red-500 text-sm mt-1">{errors.businessType}</p>}
             </div>
 
-            <div className="mb-8">
+            {/* <div className="mb-8">
               <label className="block text-gray-900 font-medium mb-3">How many people work here?</label>
               <div className="flex flex-wrap gap-3">
                 {["1-5", "6-10", "11-19", "20-29", "30-49", "50+"].map((option) => (
@@ -341,7 +341,7 @@ export default function Page() {
                 ))}
               </div>
               {errors.employeeCount && <p className="text-red-500 text-sm mt-2">{errors.employeeCount}</p>}
-            </div>
+            </div> */}
 
             <div className="flex justify-between">
               <button
