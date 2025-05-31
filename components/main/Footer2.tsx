@@ -5,13 +5,6 @@ import { socialLinks } from '@/data/socials';
 import { footerLinks } from '@/data/footerLinks';
 import Link from 'next/link';
 
-interface SocialLink {
-    href: string;
-    icon: string;
-    unicode: string;
-    color?: string;
-}
-
 interface FooterLink {
     href: string;
     text: string;
@@ -24,19 +17,19 @@ const Footer2: React.FC = () => {
                 <div className="flex flex-wrap mx-[-15px] !mt-[-30px] xl:!mt-0 lg:!mt-0">
                     <div className="md:w-4/12 xl:w-3/12 lg:w-3/12 w-full flex-[0_0_auto] !px-[15px] max-w-full xl:!mt-0 lg:!mt-0 !mt-[30px]">
                         <div className="widget">
-                            <Image className="!mb-4" src="/assets/images/logo-dark.png" alt="image" width={134} height={26} srcSet="/assets/images/logo-dark@2x.png 2x" />
+                            <Image className="!mb-4" src="/assets/images/logo-dark.png" alt="image" width={134} height={26} />
                             <p className="!mb-4">
                                 © {new Date().getFullYear()} Sandbox. <br className="hidden xl:block lg:block" />
                                 All rights reserved.
                             </p>
                             <nav className="nav social">
-                                {socialLinks.map((elm: SocialLink, i: number) => (
+                                {socialLinks.map((elm, i: number) => (
                                     <a
                                         key={i}
                                         className="!text-[1rem] transition-all duration-[0.2s] ease-in-out translate-y-0 motion-reduce:transition-none hover:translate-y-[-0.15rem] m-[0_.7rem_0_0]"
                                         href={elm.href}
                                     >
-                                        <i className={`uil ${elm.icon} before:content-[${elm.unicode}] !text-[${elm.color}] text-[1rem]`} />
+                                        <i className={`uil ${elm.icon}`} style={{ color: elm.color }} />
                                     </a>
                                 ))}
                             </nav>
@@ -80,7 +73,7 @@ const Footer2: React.FC = () => {
                                                     type="email"
                                                     defaultValue=""
                                                     name="EMAIL"
-                                                    className="required form-control relative block w-full text-[.75rem] font-medium !text-[#60697b] bg-[#fefefe] bg-clip-padding border shadow-[0_0_1.25rem_rgba(30,34,40,0.04)] rounded-[0.4rem] border-solid border-[rgba(8,60,130,0.07)] transition-[border-color] duration-[0.15s] ease-in-out focus:shadow-[0_0_1.25rem_rgba(30,34,40,0.04),unset] focus-visible:!border-[rgba(63,120,224,0.5)] placeholder:!text-[#959ca9] placeholder:opacity-100 m-0 !pr-9 p-[.6rem_1rem] h-[calc(2.5rem_+_2px)] min-h-[calc(2.5rem_+_2px)] !leading-[1.25]"
+                                                    className="required form-control relative block w-full text-[.75rem] font-medium !text-[#60697b] bg-[#fefefe] bg-clip-padding border shadow-[0_0_1.25rem_rgba(30,34,40,0.04)] rounded-[0.4rem] border-solid border-[rgba(8,60,130,0.07)] transition-[border-color] duration-[0.15s] ease-in-out focus:shadow-[0_0_1.25rem_rgba(30,34,40,0.04),unset] focus-visible:!border-[rgba(63,120,224,0.5)] placeholder:!text-[#959ca9] placeholder:opacity-100 m-0 !pr-9 py-[0.4rem] px-4 h-[calc(2.5rem_+_2px)] min-h-[calc(2.5rem_+_2px)] !leading-[1.25]"
                                                     placeholder=""
                                                     id="mce-EMAIL2"
                                                 />

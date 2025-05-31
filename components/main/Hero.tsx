@@ -25,7 +25,7 @@ const Hero: React.FC = () => {
                     }}
                 />
                 <figure className="rounded-[0.4rem] relative z-[2]">
-                    <Image className="rounded-[0.4rem]" src="/assets/images/photos/about7.jpg" alt="image" width={575} height={550} srcSet="/assets/images/photos/about7@2x.jpg 2x" />
+                    <Image className="rounded-[0.4rem]" src="/assets/images/photos/about7.jpg" alt="image" width={575} height={550} />
                 </figure>
             </div>
             <div
@@ -42,13 +42,13 @@ const Hero: React.FC = () => {
                     <span>
                         <Link
                             href="https://shiftswap-demo.vercel.app/"
-                            className="btn btn-lg btn-primary !text-white !bg-[#3f78e0] border-[#3f78e0] hover:text-white hover:bg-[#3f78e0] hover:!border-[#3f78e0] active:text-white active:bg-[#3f78e0] active:border-[#3f78e0] disabled:text-white disabled:bg-[#3f78e0] disabled:border-[#3f78e0] !rounded-[50rem] !mr-2"
+                            className="btn btn-lg !py-[0.4rem] !px-4 btn-primary !text-white !bg-[#3f78e0] border-[#3f78e0] hover:text-white hover:bg-[#3f78e0] hover:!border-[#3f78e0] active:text-white active:bg-[#3f78e0] active:border-[#3f78e0] disabled:text-white disabled:bg-[#3f78e0] disabled:border-[#3f78e0] !rounded-[50rem] !mr-2"
                         >
                             Explore
                         </Link>
                     </span>
                     <span>
-                        <Link href="/contact" className="btn btn-lg btn-outline-primary !rounded-[50rem]">
+                        <Link href="/contact" className="btn btn-lg !py-[0.4rem] !px-4 btn-outline-primary !rounded-[50rem]">
                             Register Now
                         </Link>
                     </span>

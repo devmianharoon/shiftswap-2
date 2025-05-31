@@ -1,7 +1,18 @@
-import React from 'react';
+'use client';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
+import Rellax from 'rellax';
 
 const Process: React.FC = () => {
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const rellax = new Rellax('.rellax', { speed: 1 });
+            return () => {
+                rellax.destroy();
+            };
+        }
+    }, []);
+
     return (
         <div className="flex flex-wrap mx-[-15px] max-sm:!mt-[-50px] !mt-[-80px] xl:mx-[-7.5px] lg:mx-[-7.5px] items-center !mb-[4.5rem] md:!mb-[7rem] lg:!mb-[9rem] xl:!mb-[9rem]">
             <div className="md:w-8/12 lg:w-6/12 xl:w-6/12 w-full flex-[0_0_auto] xl:!px-[7.5px] lg:!px-[7.5px] !px-[15px] max-w-full !relative !mt-[80px]">
@@ -21,7 +32,7 @@ const Process: React.FC = () => {
                     }}
                 />
                 <figure className="!rounded-[.4rem] relative z-[2]">
-                    <Image className="!rounded-[.4rem]" src="/assets/images/photos/about9.jpg" alt="image" width={575} height={550} srcSet="/assets/images/photos/about9@2x.jpg 2x" />
+                    <Image className="!rounded-[.4rem]" src="/assets/images/photos/about9.jpg" alt="image" width={575} height={550} />
                 </figure>
             </div>
             <div className="lg:w-5/12 xl:w-4/12 xl:!ml-[8.33333333%] lg:!ml-[8.33333333%] w-full flex-[0_0_auto] xl:!px-[7.5px] lg:!px-[7.5px] !px-[15px] max-w-full !mt-[80px]">

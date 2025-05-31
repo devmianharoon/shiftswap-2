@@ -1,10 +1,20 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import ModalVideo from '@/components/common/ModalVideo';
+import Rellax from 'rellax';
 
 const Services: React.FC = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const rellax = new Rellax('.rellax', { speed: 0 });
+            return () => {
+                rellax.destroy();
+            };
+        }
+    }, []);
 
     return (
         <>
@@ -33,7 +43,7 @@ const Services: React.FC = () => {
                         }}
                     />
                     <figure className="!rounded-[.4rem] relative z-[2]">
-                        <Image className="!rounded-[.4rem]" src="/assets/images/photos/about12.jpg" alt="image" width={650} height={520} srcSet="/assets/images/photos/about12@2x.jpg 2x" />
+                        <Image className="!rounded-[.4rem]" src="/assets/img/photos/about12.jpg" alt="image" width={650} height={520} />
                     </figure>
                 </div>
                 <div className="xl:w-5/12 lg:w-5/12 w-full flex-[0_0_auto] xl:!px-[7.5px] lg:!px-[7.5px] !px-[15px] max-w-full xl:!ml-[8.33333333%] lg:!ml-[8.33333333%] !mt-[80px]">
