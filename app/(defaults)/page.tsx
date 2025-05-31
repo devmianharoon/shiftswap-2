@@ -10,8 +10,7 @@ export const metadata: Metadata = {
 
 const Sales = () => {
     // return <ComponentsDashboardAnalytics />;
-        return <ComponentsAppsCalendar />;
-
+    return <ComponentsAppsCalendar />;
 };
 
 export default Sales;
