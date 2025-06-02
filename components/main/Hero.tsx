@@ -4,9 +4,9 @@ import Link from 'next/link';
 
 const Hero: React.FC = () => {
     return (
-        <div className="flex flex-wrap mx-[-15px] lg:mx-0 xl:mx-[-20px] !mb-7 md:!mb-10 lg:!mb-[6rem] xl:!mb-[6rem] items-center">
+        <div className="flex flex-wrap mx-[-15px] lg:mx-0 xl:mx-[-20px] mb-7 md:!mb-10 lg:!mb-[6rem] xl:!mb-[6rem] items-center">
             <div
-                className="md:w-8/12 md:!ml-[16.66666667%] lg:w-6/12 lg:!ml-[8.33333333%] xl:w-6/12 xl:!ml-[8.33333333%] w-full flex-[0_0_auto] !px-[15px] lg:px-0 xl:!px-[20px] max-w-full !relative lg:!order-2 xl:!order-2"
+                className="md:w-8/12 lg:w-6/12 xl:w-6/12 w-full flex-[0_0_auto]  max-w-full !relative lg:!order-2 xl:!order-2"
                 data-cue="zoomIn"
             >
                 <div
@@ -15,17 +15,19 @@ const Hero: React.FC = () => {
                     style={{ top: '-1.7rem', left: '-1.5rem' }}
                 />
                 <div
-                    className="shape rounded !bg-[#edf2fc] rellax xl:block lg:block md:block absolute z-[1]"
+                    className=" hidden md:block bg-[#edf2fc] w-[85%] h-[90%] absolute bottom-[-1.8rem] right-0 z-[1]"
                     data-rellax-speed={0}
-                    style={{
-                        bottom: '-1.8rem',
-                        right: '-0.8rem',
-                        width: '85%',
-                        height: '90%',
-                    }}
-                />
+                    // style={{
+                    //     bottom: '-1.8rem',
+                    //     right: '0rem',
+                    //     width: '85%',
+                    //     height: '90%',
+                    //     bg-[#edf2fc]
+                    // }}
+                >
+                </div>
                 <figure className="rounded-[0.4rem] relative z-[2]">
-                    <Image className="rounded-[0.4rem]" src="/assets/images/photos/about7.jpg" alt="image" width={575} height={550} />
+                    <Image className="rounded-[0.4rem]" src="/assets/images/photos/about7.jpg" alt="image" width={750} height={550} />
                 </figure>
             </div>
             <div

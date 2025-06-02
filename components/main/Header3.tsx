@@ -8,7 +8,7 @@ import { socialLinks } from '@/data/socials';
 const Header3: React.FC = () => {
     return (
         <header className="relative wrapper !bg-[#ffffff]">
-            <div className="bg-[rgba(63,120,224)] !text-white font-bold text-[.75rem] !mb-2">
+            <div className=" hidden md:block bg-[rgba(63,120,224)] !text-white font-bold text-[.75rem] !mb-2">
                 <div className="container py-2 xl:!flex lg:!flex md:!flex xl:!flex-row lg:!flex-row md:!flex-row">
                     <div className="flex flex-row items-center">
                         <div className="icon !text-white !text-[1.1rem] !mt-[.25rem] !mr-[.5rem]">
@@ -35,13 +35,32 @@ const Header3: React.FC = () => {
                 </div>
             </div>
             <nav className="navbar navbar-expand-lg center-nav transparent navbar-light">
-                <div className="flex justify-center container xl:!flex-row lg:!flex-row !flex-nowrap items-center">
-                    <div className="navbar-brand w-full">
+                    <div className="navbar-brand container w-full flex flex-wrap justify-between items-center p-2 md:p-0">
                         <Link href="/">
                             <Image src="/assets/images/logo.png" alt="image" width={134} height={26} />
                         </Link>
+                        <div className='flex gap-2 items-center'>
+
+                        <div>
+                            <Link
+                                href="/signin"
+                                className="btn py-[0.4rem] px-4 btn-primary !text-white !bg-[#3f78e0] border-[#3f78e0] hover:text-white hover:bg-[#3f78e0] hover:!border-[#3f78e0] active:text-white active:bg-[#3f78e0] active:border-[#3f78e0] disabled:text-white disabled:bg-[#3f78e0] disabled:border-[#3f78e0] !rounded-[50rem] hover:translate-y-[-0.15rem] hover:shadow-[0_0.25rem_0.75rem_rgba(30,34,40,0.15)]"
+                                >
+                                Login
+                            </Link>
+                        </div>
+
+                        <div className="">
+                            <Link
+                                href="/signup"
+                                className="btn py-[0.4rem] px-4 btn-primary !text-white !bg-[#3f78e0] border-[#3f78e0] hover:text-white hover:bg-[#3f78e0] hover:!border-[#3f78e0] active:text-white active:bg-[#3f78e0] active:border-[#3f78e0] disabled:text-white disabled:bg-[#3f78e0] disabled:border-[#3f78e0] !rounded-[50rem] hover:translate-y-[-0.15rem] hover:shadow-[0_0.25rem_0.75rem_rgba(30,34,40,0.15)]"
+                                >
+                                Register
+                            </Link>
+                        </div>
+                                </div>
                     </div>
-                    <div className="navbar-collapse offcanvas offcanvas-nav offcanvas-start">
+                    {/* <div className="navbar-collapse offcanvas offcanvas-nav offcanvas-start">
                         <div className="offcanvas-header xl:!hidden lg:!hidden flex items-center justify-between flex-row p-6">
                             <h3 className="!text-white xl:!text-[1.5rem] !text-[calc(1.275rem_+_0.3vw)] !mb-0">Sandbox</h3>
                             <button
@@ -51,21 +70,20 @@ const Header3: React.FC = () => {
                                 aria-label="Close"
                             />
                         </div>
-                        <div className="offcanvas-body xl:!ml-auto lg:!ml-auto flex flex-col !h-full">{/* <Nav color="rgba(63,120,224)" /> */}</div>
-                    </div>
-                    <div className="navbar-other w-full !flex !ml-auto">
+                    </div> */}
+                    {/* <div className="offcanvas-body xl:!ml-auto lg:!ml-auto flex flex-col !h-full">
+                            <Nav color="rgba(63,120,224)" />
+                            </div> */}
+                    {/* <div className="navbar-other w-full !flex !ml-auto">
                         <ul className="navbar-nav !flex-row !items-center !ml-auto flex gap-1">
-                            {/* Uncomment to include social links */}
-                            {/* {socialLinks.map((elm, i) => (
-                <li key={i} className="nav-item">
-                  <a
-                    className="!text-[1rem] transition-all duration-[0.2s] ease-in-out translate-y-0 motion-reduce:transition-none hover:translate-y-[-0.15rem]"
-                    href={elm.href}
-                  >
-                    <i className={`uil ${elm.icon}`} style={{ color: elm.color }} />
-                  </a>
-                </li>
-              ))} */}
+                            Uncomment to include social links
+                            {socialLinks.map((elm, i) => (
+                                <li key={i} className="nav-item">
+                                    <a className="!text-[1rem] transition-all duration-[0.2s] ease-in-out translate-y-0 motion-reduce:transition-none hover:translate-y-[-0.15rem]" href={elm.href}>
+                                        <i className={`uil ${elm.icon}`} style={{ color: elm.color }} />
+                                    </a>
+                                </li>
+                            ))}
                             <li className="nav-item hidden xl:block lg:block md:block">
                                 <Link
                                     href="/signin"
@@ -79,7 +97,7 @@ const Header3: React.FC = () => {
                                     href="/signup"
                                     className="btn py-[0.4rem] px-4 btn-primary !text-white !bg-[#3f78e0] border-[#3f78e0] hover:text-white hover:bg-[#3f78e0] hover:!border-[#3f78e0] active:text-white active:bg-[#3f78e0] active:border-[#3f78e0] disabled:text-white disabled:bg-[#3f78e0] disabled:border-[#3f78e0] !rounded-[50rem] hover:translate-y-[-0.15rem] hover:shadow-[0_0.25rem_0.75rem_rgba(30,34,40,0.15)]"
                                 >
-                                Register
+                                    Register
                                 </Link>
                             </li>
                             <li className="nav-item xl:!hidden lg:!hidden">
@@ -88,8 +106,7 @@ const Header3: React.FC = () => {
                                 </button>
                             </li>
                         </ul>
-                    </div>
-                </div>
+                    </div> */}
             </nav>
         </header>
     );

@@ -15,24 +15,25 @@ const Process: React.FC = () => {
 
     return (
         <div className="flex flex-wrap mx-[-15px] max-sm:!mt-[-50px] !mt-[-80px] xl:mx-[-7.5px] lg:mx-[-7.5px] items-center !mb-[4.5rem] md:!mb-[7rem] lg:!mb-[9rem] xl:!mb-[9rem]">
-            <div className="md:w-8/12 lg:w-6/12 xl:w-6/12 w-full flex-[0_0_auto] xl:!px-[7.5px] lg:!px-[7.5px] !px-[15px] max-w-full !relative !mt-[80px]">
+            <div className="md:w-8/12 lg:w-6/12 xl:w-6/12 w-full flex-[0_0_auto]  max-w-full !relative !mt-[80px]">
                 <div
                     className="shape bg-line red !rounded-[50%] rellax !w-[8rem] !h-[8rem] absolute z-[1] opacity-50 bg-[radial-gradient(#3f78e0_2px,transparent_2.5px)]"
                     data-rellax-speed={1}
                     style={{ top: '-2.2rem', left: '-2.4rem' }}
                 />
                 <div
-                    className="shape !rounded-[.4rem] !bg-[#edf2fc] rellax xl:block lg:block md:block !absolute z-[1]"
+                    className=" hidden md:block bg-[#edf2fc] w-[85%] h-[90%] absolute bottom-[-1.8rem] right-0 z-[1]"
                     data-rellax-speed={0}
-                    style={{
-                        bottom: '-1.8rem',
-                        right: '-1.5rem',
-                        width: '85%',
-                        height: '90%',
-                    }}
-                />
+                    // style={{
+                    //     bottom: '-1.8rem',
+                    //     right: '0rem',
+                    //     width: '85%',
+                    //     height: '90%',
+                    // 
+                    // }}
+                ></div>
                 <figure className="!rounded-[.4rem] relative z-[2]">
-                    <Image className="!rounded-[.4rem]" src="/assets/images/photos/about9.jpg" alt="image" width={575} height={550} />
+                    <Image className="!rounded-[.4rem]" src="/assets/images/photos/about9.jpg" alt="image" width={750} height={550} />
                 </figure>
             </div>
             <div className="lg:w-5/12 xl:w-4/12 xl:!ml-[8.33333333%] lg:!ml-[8.33333333%] w-full flex-[0_0_auto] xl:!px-[7.5px] lg:!px-[7.5px] !px-[15px] max-w-full !mt-[80px]">
