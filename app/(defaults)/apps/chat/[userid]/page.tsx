@@ -5,7 +5,9 @@ import { useParams } from 'next/navigation';
 import React from 'react';
 
 const Chat = () => {
-  return <ComponentsAppsChat loginUserId={'1'} />;
+  const params = useParams();
+  const chatId = params.userid; // or params['id']
+  return <ComponentsAppsChat loginUserId={chatId} />;
 };
 
 export default Chat;
