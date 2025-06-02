@@ -25,7 +25,6 @@ export const useChat = (userId: string, selectedRecipientId: string | null) => {
   useEffect(() => {
     const initCrypto = async () => {
       const sharedSecret = process.env.NEXT_PUBLIC_CHAT_SHARED_SECRET; // Replace with secure shared passphrase
-      console.log('Using shared secret:', sharedSecret);
       const salt = new TextEncoder().encode('chat-salt'); // Fixed salt for consistency
       const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(sharedSecret), { name: 'PBKDF2' }, false, ['deriveKey']);
       const key = await crypto.subtle.deriveKey(
@@ -51,8 +50,6 @@ export const useChat = (userId: string, selectedRecipientId: string | null) => {
     if (!userId) return;
 
     socketRef.current = new WebSocket(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}${userId}`);
-    console.log('WebSocket initialized for user:', userId);
-    console.log('WebSocket URL:', `${process.env.NEXT_PUBLIC_WEBSOCKET_URL}${userId}`);
     const socket = socketRef.current;
 
     socket.onopen = () => console.log('WebSocket connected');
