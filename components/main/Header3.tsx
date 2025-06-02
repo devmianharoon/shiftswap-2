@@ -78,8 +78,9 @@ const Header3: React.FC = () => {
                                 <Link
                                     href="/signup"
                                     className="btn py-[0.4rem] px-4 btn-primary !text-white !bg-[#3f78e0] border-[#3f78e0] hover:text-white hover:bg-[#3f78e0] hover:!border-[#3f78e0] active:text-white active:bg-[#3f78e0] active:border-[#3f78e0] disabled:text-white disabled:bg-[#3f78e0] disabled:border-[#3f78e0] !rounded-[50rem] hover:translate-y-[-0.15rem] hover:shadow-[0_0.25rem_0.75rem_rgba(30,34,40,0.15)]"
-                                />
+                                >
                                 Register
+                                </Link>
                             </li>
                             <li className="nav-item xl:!hidden lg:!hidden">
                                 <button className="hamburger offcanvas-nav-btn">
