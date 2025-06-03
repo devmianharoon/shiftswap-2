@@ -32,7 +32,7 @@
         "highlight.js": "^11.7.0",
         "i18next": "^23.13.0",
         "mantine-datatable": "^1.7.35",
-        "next": "14.2.13",
+        "next": "^15.3.3",
         "ni18n": "^1.0.5",
         "react": "18.3.1",
         "react-animate-height": "^3.1.0",
