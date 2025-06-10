@@ -67,7 +67,7 @@ export default function Signin() {
                   </a>
                 </p>
                 <p className="!mb-0">
-                  Don't have an account?
+                  Dont have an account?
                   <Link href={`/signup`} className="hover">
                     Sign up
                   </Link>
