@@ -8,9 +8,9 @@ export const metadata: Metadata = {
     title: 'Sales Admin',
 };
 
-const Sales = () => {
+const Page = () => {
     return <ComponentsDashboardAnalytics />;
     // return <ComponentsAppsCalendar />;
 };
 
-export default Sales;
+export default Page;
