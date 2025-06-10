@@ -253,7 +253,7 @@ const RegisterPage = () => {
                 return (
                     <div className="max-w-md animate-fadeIn">
                         <div className="mb-8">
-                            <h1 className="text-4xl font-bold text-gray-900 mb-4">DEV, tell us about your business</h1>
+                            <h1 className="text-4xl font-bold text-gray-900 mb-4"> Tell us about your business</h1>
                         </div>
 
                         <div className="mb-6">
@@ -532,7 +532,7 @@ const RegisterPage = () => {
                             <input
                                 type="text"
                                 placeholder="sceret code..."
-                                value={formData.secretCode}
+                                // value={formData.secretCode}
                                 onChange={(e) => handleInputChange('Secret Code', e.target.value)}
                                 className={`w-full px-4 py-3 border ${
                                     errors.secretCode ? 'border-red-500' : 'border-gray-300'
@@ -547,7 +547,7 @@ const RegisterPage = () => {
                                 <select
                                     value={formData.companyType}
                                     onChange={(e) => handleInputChange('businessType', e.target.value)}
-                                    disabled
+                                    // disabled
                                     className={`w-full px-4 py-3 border ${
                                         errors.companyType ? 'border-red-500' : 'border-gray-300'
                                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white pr-10`}
@@ -574,7 +574,7 @@ const RegisterPage = () => {
                                 <select
                                     value={formData.skillType}
                                     onChange={(e) => handleInputChange('businessType', e.target.value)}
-                                    disabled
+                                    // disabled
                                     className={`w-full px-4 py-3 border ${
                                         errors.skillType ? 'border-red-500' : 'border-gray-300'
                                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white pr-10`}
@@ -594,22 +594,6 @@ const RegisterPage = () => {
                             </div>
                             {errors.companyType && <p className="text-red-500 text-sm mt-1">{errors.companyType}</p>}
                         </div>
-
-                        {/* <div className="mb-6">
-                            <label className="block text-gray-900 font-medium mb-3">Upload your company logo</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleFileUpload(e)}
-                                className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-gray-700 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-                            />
-                            {formData.logoPreview && (
-                                <div className="mt-3">
-                                    <Image src={formData.logoPreview} width={96} height={96} alt="Logo preview" className="h-16 object-contain" />
-                                </div>
-                            )}
-                            {errors.logo && <p className="text-red-500 text-sm mt-1">{errors.logo}</p>}
-                        </div> */}
                         <div className="flex justify-between">
                             <button
                                 onClick={handlePrevious}

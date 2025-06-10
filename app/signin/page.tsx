@@ -73,7 +73,7 @@ export default function Page() {
     <div className="min-h-screen flex flex-col">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white shadow-sm">
-        <div className="text-2xl font-bold text-gray-800">Sift Swap</div>
+        <div className="text-2xl font-bold text-gray-800"><Link href={'/'}>Sift Swap</Link></div>
         <div className="flex gap-3">
           <Link href={'/singin'} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
             Login
@@ -81,8 +81,8 @@ export default function Page() {
           {/* <button className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
             Register
           </button> */}
-          <Link  href={'/register'} className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-            Register
+          <Link  href={'/signup'} className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            SignUp
           </Link>
         </div>
       </header>
