@@ -33,6 +33,8 @@ import IconMenuAuthentication from '@/components/icon/menu/icon-menu-authenticat
 import IconMenuDocumentation from '@/components/icon/menu/icon-menu-documentation';
 import { usePathname } from 'next/navigation';
 import { getTranslation } from '@/i18n';
+import { LayoutDashboard, CalendarClock, Users2, Layers3, FileBarChart, Settings, UserRound } from 'lucide-react';
+
 
 const Sidebar = () => {
     const dispatch = useDispatch();
@@ -83,7 +85,7 @@ const Sidebar = () => {
     };
 
     return (
-        <div className={semidark ? 'dark' : ''}>
+        <div className={semidark ? 'light' : ''}>
             <nav
                 className={`sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 ${semidark ? 'text-white-dark' : ''}`}
             >
@@ -107,8 +109,8 @@ const Sidebar = () => {
                             <li className="nav-item">
                                 <Link href="/dashboard/apps/calendar" className="group">
                                     <div className="flex items-center">
-                                        <IconMenuCalendar className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('calendar')}</span>
+                                        <LayoutDashboard className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Dashboard')}</span>
                                     </div>
                                 </Link>
                             </li>
@@ -117,14 +119,14 @@ const Sidebar = () => {
                                     <li className="nav-item">
                                         <Link href="/dashboard/apps/chat" className="group">
                                             <div className="flex items-center">
-                                                <IconMenuChat className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('chat')}</span>
+                                                <CalendarClock className="shrink-0 group-hover:!text-primary" />
+                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('My Shifts')}</span>
                                             </div>
                                         </Link>
                                     </li>
                                 </ul>
                             </li>
-                            
+
                             <li className="menu nav-item">
                                 {/* <button type="button" className={`${currentMenu === 'analytics' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('analytics')}> */}
                                 {/* <Link href="/analytics" className="group">
@@ -140,10 +142,51 @@ const Sidebar = () => {
                             <li className="nav-item">
                                 <Link href="/dashboard/apps/contacts" className="group">
                                     <div className="flex items-center">
-                                        <IconMenuContacts className="shrink-0 group-hover:!text-primary" />
-                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('contacts')}</span>
+                                        <Users2  className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Teams')}</span>
                                     </div>
                                 </Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link href="/dashboard/groups" className="group">
+                                    <div className="flex items-center">
+                                        <Layers3 className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Groups')}</span>
+                                    </div>
+                                </Link>
+                                <li className="nav-item">
+                                    <Link href="/dashboard/apps/contacts" className="group">
+                                        <div className="flex items-center">
+                                            <FileBarChart className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Reports')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link href="/dashboard/apps/contacts" className="group">
+                                        <div className="flex items-center">
+                                            <Settings className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Settings')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+
+                                <li className="nav-item">
+                                    <Link href="/dashboard/members" className="group">
+                                        <div className="flex items-center">
+                                            <UserRound className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Members')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                        <Link href="/dashboard/apps/calendar" className="group">
+                                            <div className="flex items-center">
+                                                <CalendarClock className="shrink-0 group-hover:!text-primary" />
+                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Shifts')}</span>
+                                            </div>
+                                        </Link>
+                                    </li>
                             </li>
                         </ul>
                     </PerfectScrollbar>

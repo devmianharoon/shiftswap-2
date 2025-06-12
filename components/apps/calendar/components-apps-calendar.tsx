@@ -248,7 +248,7 @@ const ComponentsAppsCalendar = () => {
                 <div className="mb-4 flex flex-col items-center justify-center sm:flex-row sm:justify-between">
                     <div className="mb-4 sm:mb-0">
                         <div className="text-center text-lg font-semibold ltr:sm:text-left rtl:sm:text-right">Calendar</div>
-                        <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start">
+                        {/* <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start">
                             <div className="flex items-center ltr:mr-4 rtl:ml-4">
                                 <div className="h-2.5 w-2.5 rounded-sm bg-primary ltr:mr-2 rtl:ml-2"></div>
                                 <div>Work</div>
@@ -265,11 +265,11 @@ const ComponentsAppsCalendar = () => {
                                 <div className="h-2.5 w-2.5 rounded-sm bg-danger ltr:mr-2 rtl:ml-2"></div>
                                 <div>Important</div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                     <button type="button" className="btn btn-primary" onClick={() => editEvent()}>
                         <IconPlus className="ltr:mr-2 rtl:ml-2" />
-                        Create Event
+                        Create Shift
                     </button>
                 </div>
                 <div className="calendar-wrapper">
@@ -327,18 +327,18 @@ const ComponentsAppsCalendar = () => {
                                         <IconX />
                                     </button>
                                     <div className="bg-[#fbfbfb] py-3 text-lg font-medium ltr:pl-5 ltr:pr-[50px] rtl:pl-[50px] rtl:pr-5 dark:bg-[#121c2c]">
-                                        {params.id ? 'Edit Event' : 'Add Event'}
+                                        {params.id ? 'Edit Shift' : 'Add Shift'}
                                     </div>
                                     <div className="p-5">
                                         <form className="space-y-5">
                                             <div>
-                                                <label htmlFor="title">Event Title :</label>
+                                                <label htmlFor="title">Shift Title :</label>
                                                 <input
                                                     id="title"
                                                     type="text"
                                                     name="title"
                                                     className="form-input"
-                                                    placeholder="Enter Event Title"
+                                                    placeholder="Enter Shift Title"
                                                     value={params.title || ''}
                                                     onChange={(e) => changeValue(e)}
                                                     required
@@ -377,18 +377,35 @@ const ComponentsAppsCalendar = () => {
                                                 <div className="mt-2 text-danger" id="endDateErr"></div>
                                             </div>
                                             <div>
-                                                <label htmlFor="description">Event Description :</label>
+                                                <label htmlFor="group" className="block  mb-1">
+                                                    Group:
+                                                </label>
+                                                <select
+                                                    id="group"
+                                                    name="group"
+                                                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                                >
+                                                    <option value="">Select Group</option>
+                                                    <option value="group1">Front Desk Team</option>
+                                                    <option value="group2">Kitchen Staff</option>
+                                                    <option value="group3">Leading Directors</option>
+                                                    <option value="group4">Senior Managers</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="description">Shift Description :</label>
                                                 <textarea
                                                     id="description"
                                                     name="description"
                                                     className="form-textarea min-h-[130px]"
-                                                    placeholder="Enter Event Description"
+                                                    placeholder="Enter Shift Description"
                                                     value={params.description || ''}
                                                     onChange={(e) => changeValue(e)}
                                                 ></textarea>
                                             </div>
                                             <div>
-                                                <label>Badge:</label>
+                                                {/* <label>Badge:</label>
                                                 <div className="mt-3">
                                                     <label className="inline-flex cursor-pointer ltr:mr-3 rtl:ml-3">
                                                         <input
@@ -434,14 +451,14 @@ const ComponentsAppsCalendar = () => {
                                                         />
                                                         <span className="ltr:pl-2 rtl:pr-2">Important</span>
                                                     </label>
-                                                </div>
+                                                </div> */}
                                             </div>
                                             <div className="!mt-8 flex items-center justify-end">
                                                 <button type="button" className="btn btn-outline-danger" onClick={() => setIsAddEventModal(false)}>
                                                     Cancel
                                                 </button>
                                                 <button type="button" onClick={() => saveEvent()} className="btn btn-primary ltr:ml-4 rtl:mr-4">
-                                                    {params.id ? 'Update Event' : 'Create Event'}
+                                                    {params.id ? 'Update Shift' : 'Create Shift'}
                                                 </button>
                                             </div>
                                         </form>
