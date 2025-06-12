@@ -166,7 +166,7 @@ const Header = () => {
                     <div className="hidden ltr:mr-2 rtl:ml-2 sm:block">
                         <ul className="flex items-center space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                             <li>
-                                <Link href="dashboard/apps/calendar" className="block rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60">
+                                <Link href="/dashboard/apps/calendar" className="block rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60">
                                     <IconCalendar />
                                 </Link>
                             </li>
@@ -176,7 +176,7 @@ const Header = () => {
                                 </Link>
                             </li> */}
                             <li>
-                                <Link href="dashboard/apps/chat" className="block rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60">
+                                <Link href="/dashboard/apps/chat" className="block rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60">
                                     <IconChatNotification />
                                 </Link>
                             </li>
