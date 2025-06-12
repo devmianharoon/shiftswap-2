@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import IconMenu from '@/components/icon/icon-menu';
 import IconMessage from '@/components/icon/icon-message';
@@ -6,10 +6,12 @@ import IconMoodSmile from '@/components/icon/icon-mood-smile';
 import IconSearch from '@/components/icon/icon-search';
 import IconSend from '@/components/icon/icon-send';
 import PerfectScrollbar from 'react-perfect-scrollbar';
-import { IRootState } from '@/store';
+import { IRootState, AppDispatch } from '@/store';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useChat } from '@/src/hooks/useChat'; // Relative import
+import { useDispatch, useSelector } from 'react-redux';
+import { useChat } from '@/src/hooks/useChat';
+import { fetchCompanyMembers } from '@/store/MembersSlice';
+// import { fetchCompanyMembers } from '@/store/CompanyMembersSlice'; // Corrected import
 
 interface Contact {
     userId: string;
@@ -20,21 +22,6 @@ interface Contact {
     active: boolean;
 }
 
-const contactList: Contact[] = [
-    // Same as provided, but without messages array
-    { userId: '1', name: 'Nia Hillyer', path: 'profile-16.jpeg', time: '2:09 PM', preview: 'How do you do?', active: true },
-    { userId: '2', name: 'Sean Freeman', path: 'profile-1.jpeg', time: '12:09 PM', preview: 'I was wondering...', active: false },
-    { userId: '3', name: 'Alma Clarke', path: 'profile-2.jpeg', time: '1:44 PM', preview: 'I’ve forgotten how it felt before', active: true },
-    { userId: '4', name: 'Alan Green', path: 'profile-3.jpeg', time: '2:06 PM', preview: 'But we’re probably gonna need a new carpet.', active: true },
-    { userId: '5', name: 'Shaun Park', path: 'profile-4.jpeg', time: '2:05 PM', preview: 'It’s not that bad...', active: false },
-    { userId: '6', name: 'Roxanne', path: 'profile-5.jpeg', time: '2:00 PM', preview: 'Wasup for the third time like is you bling bitch', active: false },
-    { userId: '7', name: 'Ernest Reeves', path: 'profile-6.jpeg', time: '2:09 PM', preview: 'Wasup for the third time like is you bling bitch', active: true },
-    { userId: '8', name: 'Laurie Fox', path: 'profile-7.jpeg', time: '12:09 PM', preview: 'Wasup for the third time like is you bling bitch', active: true },
-    { userId: '9', name: 'Xavier', path: 'profile-8.jpeg', time: '4:09 PM', preview: 'Wasup for the third time like is you bling bitch', active: false },
-    { userId: '10', name: 'Susan Phillips', path: 'profile-9.jpeg', time: '9:00 PM', preview: 'Wasup for the third time like is you bling bitch', active: true },
-    { userId: '11', name: 'Dale Butler', path: 'profile-10.jpeg', time: '5:09 PM', preview: 'Wasup for the third time like is you bling bitch', active: false },
-    { userId: '12', name: 'Grace Roberts', path: 'user-profile.jpeg', time: '8:01 PM', preview: 'Wasup for the third time like is you bling bitch', active: true },
-];
 interface Message {
     fromUserId: string;
     toUserId: string;
@@ -50,19 +37,81 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
     const userId = typeof loginUserId === 'string' ? loginUserId : loginUserId[0];
     const [selectedUser, setSelectedUser] = useState<Contact | null>(null);
     const { messages, sendMessage } = useChat(userId, selectedUser?.userId || null);
-    const loginUser = contactList.find((item) => item.userId == loginUserId);
-    const contactFilterList = contactList.filter((item) => item.userId != loginUser?.userId);
+    const dispatch = useDispatch<AppDispatch>();
+    const { members, loading, error } = useSelector((state: IRootState) => state.members); // Corrected state slice
     const [isShowChatMenu, setIsShowChatMenu] = useState(false);
     const [searchUser, setSearchUser] = useState('');
     const [isShowUserChat, setIsShowUserChat] = useState(false);
     const [textMessage, setTextMessage] = useState('');
-    const [filteredItems, setFilteredItems] = useState<Contact[]>(contactFilterList);
-    console.log('loginUserId:', loginUserId);
+    const [contactList, setContactList] = useState<Contact[]>([]);
+    const [loginUser, setLoginUser] = useState<Contact | null>(null);
 
+    // Fetch user data from localStorage and dispatch API call
     useEffect(() => {
-        setFilteredItems(contactFilterList.filter((d) => d.name.toLowerCase().includes(searchUser.toLowerCase())));
-    }, [searchUser]);
+        const userData = localStorage.getItem('user_data');
+        if (!userData) {
+            console.error('No user data found in localStorage');
+            return;
+        }
 
+        try {
+            const user = JSON.parse(userData);
+            if (!user?.uid) {
+                console.error('Invalid user data: missing uid');
+                return;
+            }
+
+            // Set login user for display
+            setLoginUser({
+                userId: user.uid.toString(),
+                name: user.name || 'Unknown User',
+                path: user.profile || 'user-profile.jpeg',
+                time: 'Now',
+                preview: 'Online',
+                active: true,
+            });
+
+            // Determine company ID based on account_type
+            let companyId: string;
+            if (user.account_type === 'business') {
+                companyId = user.uid.toString();
+            } else if (user.account_type === 'member') {
+                if (!user.company?.id) {
+                    console.error('Invalid company data: missing company.id for member');
+                    return;
+                }
+                companyId = user.company.id;
+            } else {
+                console.error('Invalid account type:', user.account_type);
+                return;
+            }
+
+            console.log('Fetching members for companyId:', companyId);
+            dispatch(fetchCompanyMembers(companyId));
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+        }
+    }, [dispatch]);
+
+    // Map members to contact list format and filter out login user
+    useEffect(() => {
+        if (members.length > 0) {
+            const newContactList: Contact[] = members.map((member) => ({
+                userId: member.uid.toString(),
+                name: member.name,
+                path: member.profile || 'user-profile.jpeg',
+                time: 'Now', // Placeholder
+                preview: member.email, // Placeholder
+                active: member.status,
+            }));
+
+            // Filter out the logged-in user
+            const contactFilterList = newContactList.filter((item) => item.userId !== userId);
+            setContactList(contactFilterList);
+        }
+    }, [members, userId]);
+
+    // Scroll to bottom of chat
     const scrollToBottom = () => {
         if (isShowUserChat) {
             setTimeout(() => {
@@ -97,6 +146,11 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
         }
     };
 
+    // Derive filtered items based on search
+    const filteredItems = contactList.filter((d) =>
+        d.name.toLowerCase().includes(searchUser.toLowerCase())
+    );
+
     return (
         <div>
             <div className={`relative flex h-full gap-5 sm:h-[calc(100vh_-_150px)] sm:min-h-0 ${isShowChatMenu ? 'min-h-[999px]' : ''}`}>
@@ -104,7 +158,7 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <div className="flex-none">
-                                <img src={`/assets/images/${loginUser?.path}`} className="h-12 w-12 rounded-full object-cover" alt="" />
+                                <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${loginUser?.path}`} className="h-12 w-12 rounded-full object-cover" alt="" />
                             </div>
                             <div className="mx-3">
                                 <p className="mb-1 font-semibold">{loginUser?.name}</p>
@@ -113,45 +167,57 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                         </div>
                     </div>
                     <div className="relative">
-                        <input type="text" className="peer form-input ltr:pr-9 rtl:pl-9" placeholder="Searching..." value={searchUser} onChange={(e) => setSearchUser(e.target.value)} />
+                        <input
+                            type="text"
+                            className="peer form-input ltr:pr-9 rtl:pl-9"
+                            placeholder="Searching..."
+                            value={searchUser}
+                            onChange={(e) => setSearchUser(e.target.value)}
+                        />
                         <div className="absolute top-1/2 -translate-y-1/2 peer-focus:text-primary ltr:right-2 rtl:left-2">
                             <IconSearch />
                         </div>
                     </div>
                     <div className="h-px w-full border-b border-white-light dark:border-[#1b2e4b]"></div>
                     <div className="!mt-0">
+                        {loading && <p className="text-gray-600">Loading members...</p>}
+                        {error && <p className="text-red-500">{error}</p>}
                         <PerfectScrollbar className="chat-users relative h-full min-h-[100px] space-y-0.5 ltr:-mr-3.5 ltr:pr-3.5 rtl:-ml-3.5 rtl:pl-3.5 sm:h-[calc(100vh_-_357px)]">
-                            {filteredItems.map((person) => (
-                                <div key={person.userId}>
-                                    <button
-                                        type="button"
-                                        className={`flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100 hover:text-primary dark:hover:bg-[#050b14] dark:hover:text-primary ${
-                                            selectedUser && selectedUser.userId === person.userId ? 'bg-gray-100 text-primary dark:bg-[#050b14] dark:text-primary' : ''
-                                        }`}
-                                        onClick={() => selectUser(person)}
-                                    >
-                                        <div className="flex-1">
-                                            <div className="flex items-center">
-                                                <div className="relative flex-shrink-0">
-                                                    <img src={`/assets/images/${person.path}`} className="h-12 w-12 rounded-full object-cover" alt="" />
-                                                    {person.active && (
-                                                        <div className="absolute bottom-0 ltr:right-0 rtl:left-0">
-                                                            <div className="h-4 w-4 rounded-full bg-success"></div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="mx-3 ltr:text-left rtl:text-right">
-                                                    <p className="mb-1 font-semibold">{person.name}</p>
-                                                    <p className="max-w-[185px] truncate text-xs text-white-dark">{person.preview}</p>
+                            {filteredItems.length > 0 ? (
+                                filteredItems.map((person) => (
+                                    <div key={person.userId}>
+                                        <button
+                                            type="button"
+                                            className={`flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100 hover:text-primary dark:hover:bg-[#050b14] dark:hover:text-primary ${
+                                                selectedUser && selectedUser.userId === person.userId ? 'bg-gray-100 text-primary dark:bg-[#050b14] dark:text-primary' : ''
+                                            }`}
+                                            onClick={() => selectUser(person)}
+                                        >
+                                            <div className="flex-1">
+                                                <div className="flex items-center">
+                                                    <div className="relative flex-shrink-0">
+                                                        <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${person.path}`} className="h-12 w-12 rounded-full object-cover" alt="" />
+                                                        {person.active && (
+                                                            <div className="absolute bottom-0 ltr:right-0 rtl:left-0">
+                                                                <div className="h-4 w-4 rounded-full bg-success"></div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="mx-3 ltr:text-left rtl:text-right">
+                                                        <p className="mb-1 font-semibold">{person.name}</p>
+                                                        <p className="max-w-[185px] truncate text-xs text-white-dark">{person.preview}</p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="whitespace-nowrap text-xs font-semibold">
-                                            <p>{person.time}</p>
-                                        </div>
-                                    </button>
-                                </div>
-                            ))}
+                                            <div className="whitespace-nowrap text-xs font-semibold">
+                                                <p>{person.time}</p>
+                                            </div>
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                !loading && <p className="text-gray-600">No members found.</p>
+                            )}
                         </PerfectScrollbar>
                     </div>
                 </div>
@@ -163,7 +229,9 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                                 <IconMenu />
                             </button>
                             <div className="flex flex-col items-center justify-center py-8">
-                                <div className="mb-8 h-[calc(100vh_-_320px)] min-h-[120px] w-[280px] text-white dark:text-black md:w-[430px]">{/* SVG content unchanged */}</div>
+                                <div className="mb-8 h-[calc(100vh_-_320px)] min-h-[120px] w-[280px] text-white dark:text-black md:w-[430px]">
+                                    {/* SVG content omitted for brevity */}
+                                </div>
                                 <p className="mx-auto flex max-w-[190px] justify-center rounded-md bg-white-dark/20 p-2 font-semibold">
                                     <IconMessage className="ltr:mr-2 rtl:ml-2" />
                                     Click User To Chat
@@ -179,7 +247,7 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                                         <IconMenu />
                                     </button>
                                     <div className="relative flex-none">
-                                        <img src={`/assets/images/${selectedUser.path}`} className="h-10 w-10 rounded-full object-cover sm:h-12 sm:w-12" alt="" />
+                                        <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${selectedUser.path}`} className="h-10 w-10 rounded-full object-cover sm:h-12 sm:w-12" alt="" />
                                         <div className="absolute bottom-0 ltr:right-0 rtl:left-0">
                                             <div className="h-4 w-4 rounded-full bg-success"></div>
                                         </div>
@@ -204,9 +272,9 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                                                 <div className={`flex items-start gap-3 ${message.fromUserId === selectedUser.userId ? 'justify-start' : 'justify-end'}`}>
                                                     <div className={`flex-none ${message.fromUserId === selectedUser.userId ? '' : 'order-2'}`}>
                                                         {message.fromUserId === selectedUser.userId ? (
-                                                            <img src={`/assets/images/${selectedUser.path}`} className="h-10 w-10 rounded-full object-cover" alt="" />
+                                                            <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${selectedUser.path}`} className="h-10 w-10 rounded-full object-cover" alt="" />
                                                         ) : (
-                                                            <img src={`/assets/images/${loginUser?.path}`} className="h-10 w-10 rounded-full object-cover" alt="" />
+                                                            <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${loginUser?.path}`} className="h-10 w-10 rounded-full object-cover" alt="" />
                                                         )}
                                                     </div>
                                                     <div className="space-y-2">
@@ -221,7 +289,7 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                                                                 {message.text}
                                                             </div>
                                                             <div className={`${message.fromUserId === selectedUser.userId ? '' : 'hidden'}`}>
-                                                                <IconMoodSmile className="hover:text-primary" />
+                                                                <IconMoodSmile className="hover:bg-primary" />
                                                             </div>
                                                         </div>
                                                         <div className={`text-xs text-white-dark ${message.fromUserId === selectedUser.userId ? '' : 'ltr:text-right rtl:text-left'}`}>

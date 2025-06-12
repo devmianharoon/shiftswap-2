@@ -1,13 +1,33 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent, ChangeEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '@/store/RegisterSlice'; // Adjust the import path as needed
+import { AppDispatch, IRootState } from '@/store'; // Adjust the import path as needed
+import axios from 'axios';
+interface Type {
+    id: string;
+    label: string;
+}
+
+interface CompanyDetails {
+    business: {
+        name: string;
+        skills: Type[];
+    type: Type;
+    uid: string;
+    };
+    
+}
 const RegisterPage = () => {
     const searchParams = useSearchParams();
     const role = searchParams.get('type'); // 'owner' or 'employee'
     const router = useRouter();
+    const dispatch = useDispatch<AppDispatch>();
+    const { loading, error } = useSelector((state: IRootState) => state.register); // Use 'loading' instead of 'status'
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<{
         name: string;
@@ -23,10 +43,14 @@ const RegisterPage = () => {
         sendMobileApp: boolean;
         agreeToTerms: boolean;
         logo: File | null;
-        logoPreview: string;
+        logoPreview: string | null;
         secretCode: string;
         companyType: string;
         skillType: string;
+        user_picture: File | null;
+        userPicturePreview: string | null;
+        logoFid: string | null;
+        userPictureFid: string | null;
     }>(() => ({
         name: '',
         businessName: '',
@@ -41,18 +65,24 @@ const RegisterPage = () => {
         sendMobileApp: true,
         agreeToTerms: false,
         logo: null,
-        logoPreview: '',
+        logoPreview: null,
         secretCode: '',
         companyType: '',
         skillType: '',
+        user_picture: null,
+        userPicturePreview: null,
+        logoFid: null,
+        userPictureFid: null,
     }));
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [registrationComplete, setRegistrationComplete] = useState(false);
+    const [companyDetails, setCompanyDetails] = useState<CompanyDetails | null>(null);
 
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     const totalSteps = 2;
-    //      Validate current step
+
     const validateStep = (step: number) => {
         const newErrors: Record<string, string> = {};
 
@@ -64,9 +94,6 @@ const RegisterPage = () => {
                 if (!formData.businessType) {
                     newErrors.businessType = 'Please select your business type';
                 }
-                // if (!formData.employeeCount) {
-                //     newErrors.employeeCount = 'Please select your team size';
-                // }
                 break;
             case 2:
                 if (!formData.name.trim()) {
@@ -104,12 +131,8 @@ const RegisterPage = () => {
             case 1:
                 if (!formData.secretCode.trim()) {
                     newErrors.secretCode = 'Please enter your Secret Code';
-                }
-                if (!formData.companyType) {
-                    newErrors.companyType = 'Please select your company type';
-                }
-                if (!formData.skillType) {
-                    newErrors.skillType = 'Please select your skill';
+                } else if (!companyDetails) {
+                    newErrors.secretCode = 'Invalid secret code. Please try again.';
                 }
                 break;
             case 2:
@@ -141,25 +164,35 @@ const RegisterPage = () => {
         return Object.keys(newErrors).length === 0;
     };
 
+    const fetchCompanyDetails = async (secretCode: string) => {
+        try {
+            const response = await axios.get<CompanyDetails>(`${baseUrl}/api/business/info/${secretCode}`);
+            setCompanyDetails(response.data);
+            console.log('Company details fetched:', response.data);
+            // setFormData((prev) => ({
+            //     ...prev,
+            //     companyType: response.data.companyType,
+            //     skillType: response.data.skillType,
+            // }));
+        } catch (err: any) {
+            setCompanyDetails(null);
+            setErrors((prev) => ({ ...prev, secretCode: 'Invalid secret code. Please try again.' }));
+        }
+    };
+
     const handleNext = () => {
         const isValid = validateStep(currentStep);
-        console.log('Step:', currentStep, '| Valid:', isValid);
-        if (isValid) {
-            if (currentStep < totalSteps) {
-                setCurrentStep(currentStep + 1);
-                window.scrollTo(0, 0);
-            }
+        if (isValid && currentStep < totalSteps) {
+            setCurrentStep(currentStep + 1);
+            window.scrollTo(0, 0);
         }
     };
 
     const handleNextE = () => {
         const isValid = validateEmployeeStep(currentStep);
-        console.log('Step:', currentStep, '| Valid:', isValid);
-        if (isValid) {
-            if (currentStep < totalSteps) {
-                setCurrentStep(currentStep + 1);
-                window.scrollTo(0, 0);
-            }
+        if (isValid && currentStep < totalSteps) {
+            setCurrentStep(currentStep + 1);
+            window.scrollTo(0, 0);
         }
     };
 
@@ -176,7 +209,6 @@ const RegisterPage = () => {
             [field]: value,
         }));
 
-        // Clear error when field is updated
         if (errors[field]) {
             setErrors((prev) => {
                 const newErrors = { ...prev };
@@ -184,23 +216,100 @@ const RegisterPage = () => {
                 return newErrors;
             });
         }
+
+        if (field === 'secretCode' && value) {
+            fetchCompanyDetails(value as string);
+        }
     };
+
+    const uploadFile = async (file: File) => {
+        try {
+            const formData = new FormData();
+            formData.append('file[]', file);
+
+            const response = await axios.post('https://drupal-shift-swap.asdev.tech/api/upload_file', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            const fileData = response.data.files[0];
+            return {
+                fid: fileData.fid,
+                path: fileData.path,
+            };
+        } catch (err: any) {
+            console.error('File upload failed:', err);
+            throw new Error('Failed to upload file. Please try again.');
+        }
+    };
+
+    const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>, field: 'logo' | 'user_picture') => {
+        const file = e.target.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            try {
+                // Upload the file to the API
+                const { fid, path } = await uploadFile(file);
+
+                // Create a preview URL
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    if (typeof reader.result === 'string') {
+                        setFormData((prev) => ({
+                            ...prev,
+                            [field]: file,
+                            [`${field === 'logo' ? 'logoPreview' : 'userPicturePreview'}`]: reader.result,
+                            [`${field === 'logo' ? 'logoFid' : 'userPictureFid'}`]: fid,
+                        }));
+                    }
+                };
+                reader.readAsDataURL(file);
+            } catch (err: any) {
+                setErrors((prev) => ({ ...prev, [field]: err.message }));
+                setFormData((prev) => ({
+                    ...prev,
+                    [field]: null,
+                    [`${field === 'logo' ? 'logoPreview' : 'userPicturePreview'}`]: null,
+                    [`${field === 'logo' ? 'logoFid' : 'userPictureFid'}`]: null,
+                }));
+            }
+        } else {
+            setErrors((prev) => ({ ...prev, [field]: 'Please upload a valid image file.' }));
+            setFormData((prev) => ({
+                ...prev,
+                [field]: null,
+                [`${field === 'logo' ? 'logoPreview' : 'userPicturePreview'}`]: null,
+                [`${field === 'logo' ? 'logoFid' : 'userPictureFid'}`]: null,
+            }));
+        }
+    };
+
     const handleSubmit = async () => {
         if (validateStep(currentStep)) {
             setIsSubmitting(true);
 
             try {
-                // Simulate API call
-                await new Promise((resolve) => setTimeout(resolve, 1500));
+                const apiPayload = {
+                    mail: [{ value: formData.email }],
+                    pass: [{ value: formData.password }],
+                    field_phone: [{ value: formData.phone }],
+                    name: [{ value: formData.name }],
+                    field_account_type: [{ value: 'business' as 'business' }],
+                    field_business_name: [{ value: formData.businessName }],
+                    // field_business_type: [{ target_id: formData.businessType }],
+                    field_logo: formData.logoFid ? [{ target_id: formData.logoFid }] : [],
+                    user_picture: formData.userPictureFid ? [{ target_id: formData.userPictureFid }] : [],
+                };
+
+                await dispatch(registerUser({ requestData: apiPayload, role: 'business' })).unwrap();
                 setRegistrationComplete(true);
 
-                // Redirect to dashboard after 2 seconds
                 setTimeout(() => {
-                    router.push('/dashboard');
+                    router.push('/signin');
                 }, 2000);
-            } catch (error) {
-                console.error('Registration failed:', error);
-                setErrors({ submit: 'Registration failed. Please try again.' });
+            } catch (err: any) {
+                console.error('Registration failed:', err);
+                setErrors({ submit: err.message || 'Registration failed. Please try again.' });
             } finally {
                 setIsSubmitting(false);
             }
@@ -208,56 +317,49 @@ const RegisterPage = () => {
     };
 
     const handleSubmitE = async () => {
-        if (validateEmployeeStep(currentStep)) {
+        if (validateEmployeeStep(currentStep) && companyDetails) {
             setIsSubmitting(true);
 
             try {
-                // Simulate API call
-                await new Promise((resolve) => setTimeout(resolve, 1500));
+                const apiPayload = {
+                    name: [{ value: formData.name }],
+                    mail: [{ value: formData.email }],
+                    pass: [{ value: formData.password }],
+                    field_account_type: [{ value: 'member' as 'member' }],
+                    field_phone: [{ value: formData.phone }],
+                    // field_secret_code: [{ value: formData.secretCode }],
+                    field_company: [{ target_id: companyDetails.business.uid }],
+                    field_skills: [{ target_id: formData.skillType }],
+                    field_logo: formData.logoFid ? [{ target_id: formData.logoFid }] : [],
+                    user_picture: formData.userPictureFid ? [{ target_id: formData.userPictureFid }] : [],
+                };
+
+                await dispatch(registerUser({ requestData: apiPayload, role: 'member' })).unwrap();
                 setRegistrationComplete(true);
 
-                // Redirect to dashboard after 2 seconds
                 setTimeout(() => {
-                    router.push('/dashboard');
+                    router.push('/signin');
                 }, 2000);
-            } catch (error) {
-                console.error('Registration failed:', error);
-                setErrors({ submit: 'Registration failed. Please try again.' });
+            } catch (err: any) {
+                console.error('Registration failed:', err);
+                setErrors({ submit: err.message  });
             } finally {
                 setIsSubmitting(false);
             }
         }
     };
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                if (typeof reader.result === 'string') {
-                    setFormData((prev: any) => ({
-                        ...prev,
-                        logo: file,
-                        logoPreview: reader.result,
-                    }));
-                }
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setErrors((prev) => ({ ...prev, logo: 'Please upload a valid image file.' }));
-        }
-    };
-
-    const renderStep: any = () => {
+    // Bussiness Registration Step
+    const renderStep = () => {
         switch (currentStep) {
             case 1:
+                // Bussines Types
                 return (
                     <div className="max-w-md animate-fadeIn">
                         <div className="mb-8">
-                            <h1 className="text-4xl font-bold text-gray-900 mb-4"> Tell us about your business</h1>
+                            <h1 className="text-4xl font-bold text-gray-900 mb-4">Tell us about your business</h1>
                         </div>
-
                         <div className="mb-6">
-                            <label className="block text-gray-900 font-medium mb-3">Whats your business called?</label>
+                            <label className="block text-gray-900 font-medium mb-3">What's your business called?</label>
                             <input
                                 type="text"
                                 placeholder="Business name"
@@ -269,7 +371,6 @@ const RegisterPage = () => {
                             />
                             {errors.businessName && <p className="text-red-500 text-sm mt-1">{errors.businessName}</p>}
                         </div>
-
                         <div className="mb-6">
                             <label className="block text-gray-900 font-medium mb-3">What kind of business is it?</label>
                             <div className="relative">
@@ -295,13 +396,12 @@ const RegisterPage = () => {
                             </div>
                             {errors.businessType && <p className="text-red-500 text-sm mt-1">{errors.businessType}</p>}
                         </div>
-
                         <div className="mb-6">
                             <label className="block text-gray-900 font-medium mb-3">Upload your business logo</label>
                             <input
                                 type="file"
                                 accept="image/*"
-                                onChange={(e) => handleFileUpload(e)}
+                                onChange={(e) => handleFileUpload(e, 'logo')}
                                 className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-gray-700 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
                             />
                             {formData.logoPreview && (
@@ -317,11 +417,10 @@ const RegisterPage = () => {
                                 className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200 flex items-center"
                             >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7-7" />
                                 </svg>
                                 Back
                             </button>
-
                             <button onClick={handleNext} className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center">
                                 Next
                                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,14 +430,13 @@ const RegisterPage = () => {
                         </div>
                     </div>
                 );
-
             case 2:
                 return (
                     <div className="max-w-md animate-fadeIn">
                         <div className="mb-8">
                             <h1 className="text-4xl font-bold text-gray-900 mb-4">Finish signing up</h1>
                             <p className="text-gray-600">
-                                DEV, youre about to <strong>join 100,000+ businesses</strong> that are already loving Shift Swap.
+                                You're about to <strong>join 100,000+ businesses</strong> that are already loving Shift Swap.
                             </p>
                         </div>
                         <div className="mb-4">
@@ -353,7 +451,6 @@ const RegisterPage = () => {
                                 } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
                             />
                             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-                            {/* <p className="text-sm text-gray-500 mt-2">Tell us your name. Well ask about your business later.</p> */}
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-900 font-medium mb-2">Email</label>
@@ -368,7 +465,6 @@ const RegisterPage = () => {
                             />
                             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                         </div>
-
                         <div className="mb-4">
                             <label className="block text-gray-900 font-medium mb-2">Password</label>
                             <div className="relative">
@@ -406,7 +502,6 @@ const RegisterPage = () => {
                                 <p className="text-sm text-gray-500 mt-1">Must be at least 8 characters, with 1 number</p>
                             )}
                         </div>
-
                         <div className="mb-6">
                             <label className="block text-gray-900 font-medium mb-2">Phone number</label>
                             <input
@@ -420,23 +515,21 @@ const RegisterPage = () => {
                             />
                             {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                         </div>
-
                         <div className="mb-6">
-                            <label className="block text-gray-900 font-medium mb-3">Upload your business logo</label>
+                            <label className="block text-gray-900 font-medium mb-3">Upload Your Picture</label>
                             <input
                                 type="file"
                                 accept="image/*"
-                                onChange={(e) => handleFileUpload(e)}
+                                onChange={(e) => handleFileUpload(e, 'user_picture')}
                                 className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-gray-700 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
                             />
-                            {formData.logoPreview && (
+                            {formData.userPicturePreview && (
                                 <div className="mt-3">
-                                    <Image src={formData.logoPreview} width={96} height={96} alt="Logo preview" className="h-16 object-contain" />
+                                    <Image src={formData.userPicturePreview} width={96} height={96} alt="User picture preview" className="h-16 object-contain" />
                                 </div>
                             )}
-                            {errors.logo && <p className="text-red-500 text-sm mt-1">{errors.logo}</p>}
+                            {errors.user_picture && <p className="text-red-500 text-sm mt-1">{errors.user_picture}</p>}
                         </div>
-
                         <div className="mb-6">
                             <label className={`flex items-start ${errors.agreeToTerms ? 'text-red-500' : ''}`}>
                                 <input
@@ -463,7 +556,6 @@ const RegisterPage = () => {
                             </label>
                             {errors.agreeToTerms && <p className="text-red-500 text-sm mt-1 ml-7">{errors.agreeToTerms}</p>}
                         </div>
-
                         <div className="flex justify-between">
                             <button
                                 onClick={handlePrevious}
@@ -474,15 +566,14 @@ const RegisterPage = () => {
                                 </svg>
                                 Back
                             </button>
-
                             <button
                                 onClick={handleSubmit}
-                                disabled={isSubmitting}
+                                // disabled={isSubmitting || loading}
                                 className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center ${
-                                    isSubmitting ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'
+                                    isSubmitting || loading ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'
                                 }`}
                             >
-                                {isSubmitting ? (
+                                {isSubmitting || loading ? (
                                     <>
                                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -504,21 +595,18 @@ const RegisterPage = () => {
                                 )}
                             </button>
                         </div>
-
-                        {errors.submit && <p className="text-red-500 text-sm mt-4 text-center">{errors.submit}</p>}
-
+                        {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
                         <p className="text-xs text-gray-500 mt-4">
                             You may receive text messages related to your account setup. Message & data rates may apply. Message frequency varies. Reply STOP to cancel messages.
                         </p>
                     </div>
                 );
-
             default:
                 return null;
         }
     };
-
-    const renderStepE: any = () => {
+    // Employee Registration Step
+    const renderStepE = () => {
         switch (currentStep) {
             case 1:
                 return (
@@ -526,86 +614,59 @@ const RegisterPage = () => {
                         <div className="mb-8">
                             <h1 className="text-4xl font-bold text-gray-900 mb-4">Tell us about your Company</h1>
                         </div>
-
                         <div className="mb-6">
-                            <label className="block text-gray-900 font-medium mb-3">Whats your company sceret code?</label>
+                            <label className="block text-gray-900 font-medium mb-3">What's your company secret code?</label>
                             <input
                                 type="text"
-                                placeholder="sceret code..."
-                                // value={formData.secretCode}
-                                onChange={(e) => handleInputChange('Secret Code', e.target.value)}
+                                placeholder="Secret code..."
+                                value={formData.secretCode}
+                                onChange={(e) => handleInputChange('secretCode', e.target.value)}
                                 className={`w-full px-4 py-3 border ${
                                     errors.secretCode ? 'border-red-500' : 'border-gray-300'
                                 } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
                             />
                             {errors.secretCode && <p className="text-red-500 text-sm mt-1">{errors.secretCode}</p>}
                         </div>
-
-                        <div className="mb-6">
-                            <label className="block text-gray-900 font-medium mb-3">What kind of company is it?</label>
-                            <div className="relative">
-                                <select
-                                    value={formData.companyType}
-                                    onChange={(e) => handleInputChange('businessType', e.target.value)}
-                                    // disabled
-                                    className={`w-full px-4 py-3 border ${
-                                        errors.companyType ? 'border-red-500' : 'border-gray-300'
-                                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white pr-10`}
-                                >
-                                    <option value="">What kind of company is it?</option>
-                                    <option value="restaurant">Restaurant</option>
-                                    <option value="retail">Retail</option>
-                                    <option value="healthcare">Healthcare</option>
-                                    <option value="service">Service company</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+                        {companyDetails && (
+                            <>
+                                <div className="mb-6">
+                                    <label className="block text-gray-900 font-medium mb-3">Company Type</label>
+                                    <input type="text" value={companyDetails.business.name} readOnly className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" />
                                 </div>
-                            </div>
-                            {errors.companyType && <p className="text-red-500 text-sm mt-1">{errors.companyType}</p>}
-                        </div>
-
-                        <div className="mb-6">
-                            <label className="block text-gray-900 font-medium mb-3">which kind of skill do you have?</label>
-                            <div className="relative">
-                                <select
-                                    value={formData.skillType}
-                                    onChange={(e) => handleInputChange('businessType', e.target.value)}
-                                    // disabled
-                                    className={`w-full px-4 py-3 border ${
-                                        errors.skillType ? 'border-red-500' : 'border-gray-300'
-                                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white pr-10`}
-                                >
-                                    <option value="">Select your skill</option>
-                                    <option value="restaurant">Restaurant</option>
-                                    <option value="retail">Retail</option>
-                                    <option value="healthcare">Healthcare</option>
-                                    <option value="service">Service company</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                <div className="mb-6">
+                                    <label className="block text-gray-900 font-medium mb-3">Skill Type</label>
+                                    <select
+                                        value={formData.skillType}
+                                        onChange={(e) => {
+                                            const selectedSkill = companyDetails.business.skills.find((skill) => skill.label === e.target.value);
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                skillType: selectedSkill?.id || '',
+                                            }));
+                                            // setSelectedSkillId(selectedSkill.id); // another state for id
+                                        }}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white"
+                                    >
+                                        <option value="" disabled>
+                                            Select a skill
+                                        </option>
+                                        {companyDetails?.business?.skills?.map((skill) => (
+                                            <option key={skill.id} value={skill.label}>
+                                                {skill.label}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
-                            </div>
-                            {errors.companyType && <p className="text-red-500 text-sm mt-1">{errors.companyType}</p>}
-                        </div>
-                        <div className="flex justify-between">
+                            </>
+                        )}
+                        <div className="flex justify-end">
                             <button
-                                onClick={handlePrevious}
-                                className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200 flex items-center"
+                                onClick={handleNextE}
+                                disabled={!companyDetails}
+                                className={`bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center ${
+                                    !companyDetails ? 'cursor-not-allowed opacity-50' : ''
+                                }`}
                             >
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                </svg>
-                                Back
-                            </button>
-
-                            <button onClick={handleNextE} className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center">
                                 Next
                                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -614,14 +675,13 @@ const RegisterPage = () => {
                         </div>
                     </div>
                 );
-
             case 2:
                 return (
                     <div className="max-w-md animate-fadeIn">
                         <div className="mb-8">
                             <h1 className="text-4xl font-bold text-gray-900 mb-4">Finish signing up</h1>
                             <p className="text-gray-600">
-                                DEV, youre about to <strong>join 100,000+ companies</strong> that are already loving Shift Swap.
+                                You're about to <strong>join 100,000+ companies</strong> that are already loving Shift Swap.
                             </p>
                         </div>
                         <div className="mb-4">
@@ -631,12 +691,11 @@ const RegisterPage = () => {
                                 placeholder="ex: Jane Smith"
                                 value={formData.name}
                                 onChange={(e) => handleInputChange('name', e.target.value)}
-                                className={`w-full px-4 py-3 border ${
+                                className={`w-full px-4 py-3 border particolari
                                     errors.name ? 'border-red-500' : 'border-gray-300'
                                 } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
                             />
                             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-                            {/* <p className="text-sm text-gray-500 mt-2">Tell us your name. Well ask about your business later.</p> */}
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-900 font-medium mb-2">Email</label>
@@ -651,7 +710,6 @@ const RegisterPage = () => {
                             />
                             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                         </div>
-
                         <div className="mb-4">
                             <label className="block text-gray-900 font-medium mb-2">Password</label>
                             <div className="relative">
@@ -689,7 +747,6 @@ const RegisterPage = () => {
                                 <p className="text-sm text-gray-500 mt-1">Must be at least 8 characters, with 1 number</p>
                             )}
                         </div>
-
                         <div className="mb-6">
                             <label className="block text-gray-900 font-medium mb-2">Phone number</label>
                             <input
@@ -703,23 +760,21 @@ const RegisterPage = () => {
                             />
                             {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                         </div>
-
                         <div className="mb-6">
-                            <label className="block text-gray-900 font-medium mb-3">Upload your company logo</label>
+                            <label className="block text-gray-900 font-medium mb-3">Upload Your Picture</label>
                             <input
                                 type="file"
                                 accept="image/*"
-                                onChange={(e) => handleFileUpload(e)}
+                                onChange={(e) => handleFileUpload(e, 'user_picture')}
                                 className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-gray-700 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
                             />
-                            {formData.logoPreview && (
+                            {formData.userPicturePreview && (
                                 <div className="mt-3">
-                                    <Image src={formData.logoPreview} width={96} height={96} alt="Logo preview" className="h-16 object-contain" />
+                                    <Image src={formData.userPicturePreview} width={96} height={96} alt="User picture preview" className="h-16 object-contain" />
                                 </div>
                             )}
-                            {errors.logo && <p className="text-red-500 text-sm mt-1">{errors.logo}</p>}
+                            {errors.user_picture && <p className="text-red-500 text-sm mt-1">{errors.user_picture}</p>}
                         </div>
-
                         <div className="mb-6">
                             <label className={`flex items-start ${errors.agreeToTerms ? 'text-red-500' : ''}`}>
                                 <input
@@ -746,7 +801,6 @@ const RegisterPage = () => {
                             </label>
                             {errors.agreeToTerms && <p className="text-red-500 text-sm mt-1 ml-7">{errors.agreeToTerms}</p>}
                         </div>
-
                         <div className="flex justify-between">
                             <button
                                 onClick={handlePrevious}
@@ -757,15 +811,14 @@ const RegisterPage = () => {
                                 </svg>
                                 Back
                             </button>
-
                             <button
                                 onClick={handleSubmitE}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || loading || !companyDetails}
                                 className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center ${
-                                    isSubmitting ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'
+                                    isSubmitting || loading || !companyDetails ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'
                                 }`}
                             >
-                                {isSubmitting ? (
+                                {isSubmitting || loading ? (
                                     <>
                                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -787,21 +840,17 @@ const RegisterPage = () => {
                                 )}
                             </button>
                         </div>
-
-                        {errors.submit && <p className="text-red-500 text-sm mt-4 text-center">{errors.submit}</p>}
-
+                        {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
                         <p className="text-xs text-gray-500 mt-4">
                             You may receive text messages related to your account setup. Message & data rates may apply. Message frequency varies. Reply STOP to cancel messages.
                         </p>
                     </div>
                 );
-
             default:
                 return null;
         }
     };
 
-    // Success modal
     const renderSuccessModal = () => {
         if (!registrationComplete) return null;
 
@@ -815,7 +864,7 @@ const RegisterPage = () => {
                             </svg>
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">Registration Complete!</h3>
-                        <p className="text-gray-600 mb-6">Welcome to Shift Swap, {formData.name}! Were setting up your account and will redirect you shortly.</p>
+                        <p className="text-gray-600 mb-6">Welcome to Shift Swap, {formData.name}! We're setting up your account and will redirect you shortly.</p>
                         <div className="flex justify-center">
                             <div className="animate-pulse bg-purple-600 h-2 w-24 rounded-full"></div>
                         </div>
@@ -824,11 +873,11 @@ const RegisterPage = () => {
             </div>
         );
     };
+
     return (
         <div className="min-h-screen bg-gray-50">
             {role === 'owner' ? (
                 <>
-                    {/* Header */}
                     <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
                         <div className="flex items-center justify-between max-w-7xl mx-auto">
                             <div className="text-2xl font-bold text-purple-600">Shift Swap</div>
@@ -840,11 +889,8 @@ const RegisterPage = () => {
                             </div>
                         </div>
                     </header>
-
                     <div className="flex flex-col md:flex-row max-w-7xl mx-auto">
-                        {/* Main Content */}
                         <div className="flex-1 px-6 py-12">
-                            {/* Progress Bar */}
                             <div className="mb-8 max-w-md">
                                 <div className="text-sm text-gray-600 mb-2">
                                     STEP {currentStep} OF {totalSteps}
@@ -853,12 +899,8 @@ const RegisterPage = () => {
                                     <div className="bg-purple-500 h-2 rounded-full transition-all duration-500" style={{ width: `${(currentStep / totalSteps) * 100}%` }}></div>
                                 </div>
                             </div>
-
-                            {/* Step Content */}
                             {renderStep()}
                         </div>
-
-                        {/* Right Sidebar - Hidden on mobile */}
                         <div className="w-full md:w-96 bg-white p-8 border-l border-gray-200 hidden md:block">
                             <div className="mb-8">
                                 <div className="text-right mb-4">
@@ -870,14 +912,12 @@ const RegisterPage = () => {
                                     <p className="text-sm text-gray-600 italic">One of the best software tools out there for small businesses</p>
                                 </div>
                             </div>
-
                             <div className="bg-purple-600 text-white p-6 rounded-lg mb-8">
                                 <div className="text-xl font-bold mb-4">Shift Swap</div>
                                 <div className="border-l-4 border-purple-400 pl-4">
                                     <div className="font-medium">Scheduling</div>
                                 </div>
                             </div>
-
                             <div className="text-center">
                                 <div className="text-lg font-bold text-gray-900 mb-4">100k+ businesses love us</div>
                                 <div className="flex justify-center items-center space-x-8">
@@ -895,7 +935,6 @@ const RegisterPage = () => {
                                     </div>
                                 </div>
                             </div>
-
                             {currentStep === 1 && (
                                 <div className="mt-8 text-right">
                                     <p className="text-lg font-medium text-gray-900 mb-2">Simplify scheduling, time clocks, and payroll for your team with Shift Swap.</p>
@@ -903,97 +942,78 @@ const RegisterPage = () => {
                             )}
                         </div>
                     </div>
-
-                    {/* Success Modal */}
+                    {renderSuccessModal()}
+                </>
+            ) : role === 'employee' ? (
+                <>
+                    <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
+                        <div className="flex items-center justify-between max-w-7xl mx-auto">
+                            <div className="text-2xl font-bold text-purple-600">Shift Swap Employee</div>
+                            <div className="text-sm text-gray-600">
+                                {currentStep === 2 ? 'Already have an account?' : 'Have an account?'}{' '}
+                                <Link href="/signin" className="text-purple-600 font-medium hover:underline">
+                                    Sign In
+                                </Link>
+                            </div>
+                        </div>
+                    </header>
+                    <div className="flex flex-col md:flex-row max-w-7xl mx-auto">
+                        <div className="flex-1 px-6 py-12">
+                            <div className="mb-8 max-w-md">
+                                <div className="text-sm text-gray-600 mb-2">
+                                    STEP {currentStep} OF {totalSteps}
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="bg-purple-500 h-2 rounded-full transition-all duration-500" style={{ width: `${(currentStep / totalSteps) * 100}%` }}></div>
+                                </div>
+                            </div>
+                            {renderStepE()}
+                        </div>
+                        <div className="w-full md:w-96 bg-white p-8 border-l border-gray-200 hidden md:block">
+                            <div className="mb-8">
+                                <div className="text-right mb-4">
+                                    <div className="flex items-center justify-end mb-2">
+                                        <span className="text-orange-500 font-bold mr-2">🏠 Capterra</span>
+                                        <div className="flex text-purple-500">{'★'.repeat(5)}</div>
+                                        <span className="ml-2 font-bold">5.0</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600 italic">One of the best software tools out there for small companies</p>
+                                </div>
+                            </div>
+                            <div className="bg-purple-600 text-white p-6 rounded-lg mb-8">
+                                <div className="text-xl font-bold mb-4">Shift Swap</div>
+                                <div className="border-l-4 border-purple-400 pl-4">
+                                    <div className="font-medium">Scheduling</div>
+                                </div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-lg font-bold text-gray-900 mb-4">100k+ companies love us</div>
+                                <div className="flex justify-center items-center space-x-8">
+                                    <div className="text-center">
+                                        <div className="flex text-purple-500 mb-1">{'★'.repeat(4)}☆</div>
+                                        <div className="text-sm font-medium">4.6 of 5</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="flex text-purple-500 mb-1">{'★'.repeat(5)}</div>
+                                        <div className="text-sm font-medium">4.9 out of 5</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="flex text-purple-500 mb-1">{'★'.repeat(4)}☆</div>
+                                        <div className="text-sm font-medium">4.8 of 5</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {currentStep === 1 && (
+                                <div className="mt-8 text-right">
+                                    <p className="text-lg font-medium text-gray-900 mb-2">Simplify scheduling, time clocks, and payroll for your team with Shift Swap.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     {renderSuccessModal()}
                 </>
             ) : (
-                <div className="min-h-screen">
-                    {role === 'employee' ? (
-                        <>
-                            {/* Header */}
-                            <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
-                                <div className="flex items-center justify-between max-w-7xl mx-auto">
-                                    <div className="text-2xl font-bold text-purple-600">Shift Swap employee</div>
-                                    <div className="text-sm text-gray-600">
-                                        {currentStep === 2 ? 'Already have an account?' : 'Have an account?'}{' '}
-                                        <Link href="/signin" className="text-purple-600 font-medium hover:underline">
-                                            Sign In
-                                        </Link>
-                                    </div>
-                                </div>
-                            </header>
-
-                            <div className="flex flex-col md:flex-row max-w-7xl mx-auto">
-                                {/* Main Content */}
-                                <div className="flex-1 px-6 py-12">
-                                    {/* Progress Bar */}
-                                    <div className="mb-8 max-w-md">
-                                        <div className="text-sm text-gray-600 mb-2">
-                                            STEP {currentStep} OF {totalSteps}
-                                        </div>
-                                        <div className="w-full bg-gray-200 rounded-full h-2">
-                                            <div className="bg-purple-500 h-2 rounded-full transition-all duration-500" style={{ width: `${(currentStep / totalSteps) * 100}%` }}></div>
-                                        </div>
-                                    </div>
-
-                                    {/* Step Content */}
-                                    {renderStepE()}
-                                </div>
-
-                                {/* Right Sidebar - Hidden on mobile */}
-                                <div className="w-full md:w-96 bg-white p-8 border-l border-gray-200 hidden md:block">
-                                    <div className="mb-8">
-                                        <div className="text-right mb-4">
-                                            <div className="flex items-center justify-end mb-2">
-                                                <span className="text-orange-500 font-bold mr-2">🏠 Capterra</span>
-                                                <div className="flex text-purple-500">{'★'.repeat(5)}</div>
-                                                <span className="ml-2 font-bold">5.0</span>
-                                            </div>
-                                            <p className="text-sm text-gray-600 italic">One of the best software tools out there for small companies</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-purple-600 text-white p-6 rounded-lg mb-8">
-                                        <div className="text-xl font-bold mb-4">Shift Swap</div>
-                                        <div className="border-l-4 border-purple-400 pl-4">
-                                            <div className="font-medium">Scheduling</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <div className="text-lg font-bold text-gray-900 mb-4">100k+ companies love us</div>
-                                        <div className="flex justify-center items-center space-x-8">
-                                            <div className="text-center">
-                                                <div className="flex text-purple-500 mb-1">{'★'.repeat(4)}☆</div>
-                                                <div className="text-sm font-medium">4.6 of 5</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="flex text-purple-500 mb-1">{'★'.repeat(5)}</div>
-                                                <div className="text-sm font-medium">4.9 out of 5</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="flex text-purple-500 mb-1">{'★'.repeat(4)}☆</div>
-                                                <div className="text-sm font-medium">4.8 of 5</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {currentStep === 1 && (
-                                        <div className="mt-8 text-right">
-                                            <p className="text-lg font-medium text-gray-900 mb-2">Simplify scheduling, time clocks, and payroll for your team with Shift Swap.</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Success Modal */}
-                            {renderSuccessModal()}
-                        </>
-                    ) : (
-                        <p className="text-lg text-gray-600">Access restricted. Please contact your administrator.</p>
-                    )}
-                </div>
+                <p className="text-lg text-gray-600">Access restricted. Please contact your administrator.</p>
             )}
         </div>
     );
