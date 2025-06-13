@@ -41,7 +41,7 @@ export const fetchCompanyMembers = createAsyncThunk(
   async (companyId: string, { rejectWithValue }) => {
     try {
         console.log("Fetching members for company ID:", companyId);
-      const response = await axios.get(`http://100.25.74.44:8000/company/${companyId}/members`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/company/${companyId}/members`);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Failed to fetch company members");

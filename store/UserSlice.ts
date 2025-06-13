@@ -45,7 +45,7 @@ export const fetchUser = createAsyncThunk(
   "user/fetchUser",
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`http://100.25.74.44:8000/user/${userId}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BE_URL}/user/${userId}`);
       // Store user data in localStorage
       localStorage.setItem("user_data", JSON.stringify(response.data));
       return response.data;
