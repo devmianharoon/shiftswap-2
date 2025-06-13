@@ -17,10 +17,9 @@ interface CompanyDetails {
     business: {
         name: string;
         skills: Type[];
-    type: Type;
-    uid: string;
+        type: Type;
+        uid: string;
     };
-    
 }
 const RegisterPage = () => {
     const searchParams = useSearchParams();
@@ -342,7 +341,7 @@ const RegisterPage = () => {
                 }, 2000);
             } catch (err: any) {
                 console.error('Registration failed:', err);
-                setErrors({ submit: err.message  });
+                setErrors({ submit: err.message });
             } finally {
                 setIsSubmitting(false);
             }
@@ -638,12 +637,10 @@ const RegisterPage = () => {
                                     <select
                                         value={formData.skillType}
                                         onChange={(e) => {
-                                            const selectedSkill = companyDetails.business.skills.find((skill) => skill.label === e.target.value);
                                             setFormData((prev) => ({
                                                 ...prev,
-                                                skillType: selectedSkill?.id || '',
+                                                skillType: e.target.value, // directly use id
                                             }));
-                                            // setSelectedSkillId(selectedSkill.id); // another state for id
                                         }}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white"
                                     >
@@ -651,7 +648,7 @@ const RegisterPage = () => {
                                             Select a skill
                                         </option>
                                         {companyDetails?.business?.skills?.map((skill) => (
-                                            <option key={skill.id} value={skill.label}>
+                                            <option key={skill.id} value={skill.id}>
                                                 {skill.label}
                                             </option>
                                         ))}
