@@ -17,7 +17,7 @@ const Features: React.FC = () => {
             What We Do?
           </h2>
           <h3 className="!text-[calc(1.325rem_+_0.9vw)] font-DMSerif !font-normal xl:!text-[2rem] !leading-[1.2] !mb-10">
-            The service we offer is specifically designed to meet your needs.
+            The service we offer is purpose-built to meet modern workforce needs. 
           </h3>
         </div>
       </div>

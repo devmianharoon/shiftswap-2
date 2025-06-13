@@ -18,30 +18,30 @@ interface DesignItem {
 export const services: Service[] = [
   {
     iconClass: "uil uil-phone-volume before:content-['\\ec50']",
-    title: "24/7 Support",
+    title: "24/7 Access",
     description:
-      "Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla.",
+      "Employees and managers can access schedules and request shift swaps anytime, anywhere.",
     btnClass: "btn-soft-purple",
   },
   {
     iconClass: "uil uil-shield-exclamation before:content-['\\ecb3']",
-    title: "Secure Payments",
+    title: "Smart Shift Swaps",
     description:
-      "Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla.",
+      "Streamlined swap requests with manager approvals and automatic notifications.",
     btnClass: "btn-soft-green",
   },
   {
     iconClass: "uil uil-laptop-cloud before:content-['\\ebb2']",
-    title: "Daily Updates",
+    title: "Real-Time Updates",
     description:
-      "Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla.",
+      "Instant alerts for schedule changes, shift approvals, or conflicts.",
     btnClass: "btn-soft-orange",
   },
   {
     iconClass: "uil uil-chart-line before:content-['\\e9d3']",
-    title: "Market Research",
+    title: "Compliance-First",
     description:
-      "Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla.",
+      "Ensure regulatory and company compliance with built-in rules.",
     btnClass: "btn-soft-blue",
   },
 ];

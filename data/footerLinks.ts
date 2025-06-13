@@ -5,9 +5,9 @@ interface FooterLink {
 
 export const footerLinks: FooterLink[] = [
   { text: "About Us", href: "/about" },
-  { text: "Our Story", href: "/blog" },
-  { text: "Projects", href: "/projects" },
-  { text: "Terms of Use", href: "/terms" },
+  { text: "Features", href: "/blog" },
+  { text: "Plans & Pricing", href: "/" },
+  { text: "Terms of Service", href: "/terms" },
   { text: "Privacy Policy", href: "/terms" },
 ];
 

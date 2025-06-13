@@ -37,10 +37,10 @@ const Footer2: React.FC = () => {
                     </div>
                     <div className="md:w-4/12 xl:w-3/12 lg:w-3/12 w-full flex-[0_0_auto] !px-[15px] max-w-full xl:!mt-0 lg:!mt-0 !mt-[30px]">
                         <div className="widget">
-                            <h4 className="widget-title !mb-3">Get in Touch</h4>
-                            <address className="xl:!pr-20 xxl:!pr-28 not-italic !leading-[inherit] block !mb-4">Moonshine St. 14/05 Light City, London, United Kingdom</address>
+                            <h4 className="widget-title !mb-3">Shift Swap System</h4>
+                            <address className="xl:!pr-20 xxl:!pr-28 not-italic !leading-[inherit] block !mb-4">Moonshine St. 1405 Light City, London, UK</address>
                             <a className="!text-[#60697b] hover:!text-[#60697b]" href="mailto:first.last@email.com">
-                                info@email.com
+                                info@shiftswap.com
                             </a>
                             <br />
                             00 (123) 456 78 90
@@ -48,7 +48,7 @@ const Footer2: React.FC = () => {
                     </div>
                     <div className="md:w-4/12 xl:w-3/12 lg:w-3/12 w-full flex-[0_0_auto] !px-[15px] max-w-full xl:!mt-0 lg:!mt-0 !mt-[30px]">
                         <div className="widget">
-                            <h4 className="widget-title !mb-3">Learn More</h4>
+                            <h4 className="widget-title !mb-3">Quick Links</h4>
                             <ul className="pl-0 list-none !mb-0">
                                 {footerLinks.map((elm: FooterLink, i: number) => (
                                     <li className={i !== 0 ? '!mt-[0.35rem]' : ''} key={i}>
@@ -62,8 +62,8 @@ const Footer2: React.FC = () => {
                     </div>
                     <div className="md:w-full xl:w-3/12 lg:w-3/12 w-full flex-[0_0_auto] !px-[15px] max-w-full xl:!mt-0 lg:!mt-0 !mt-[30px]">
                         <div className="widget">
-                            <h4 className="widget-title !mb-3">Our Newsletter</h4>
-                            <p className="!mb-5">Subscribe to our newsletter to get our news & deals delivered to you.</p>
+                            <h4 className="widget-title !mb-3">Newsletter Subscription</h4>
+                            <p className="!mb-5">Stay in the loop with our latest updates and product tips.</p>
                             <div className="newsletter-wrapper">
                                 <div id="mc_embed_signup2">
                                     <form onSubmit={(e: React.FormEvent) => e.preventDefault()} id="mc-embedded-subscribe-form2" name="mc-embedded-subscribe-form" className="validate dark-fields">

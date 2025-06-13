@@ -48,10 +48,9 @@ const Services: React.FC = () => {
                 </div>
                 <div className="xl:w-5/12 lg:w-5/12 w-full flex-[0_0_auto] xl:!px-[7.5px] lg:!px-[7.5px] !px-[15px] max-w-full xl:!ml-[8.33333333%] lg:!ml-[8.33333333%] !mt-[80px]">
                     <h2 className="!text-[.75rem] uppercase !text-[#aab0bc] !mb-3 !tracking-[0.02rem] !leading-[1.35]">Who Are We?</h2>
-                    <h3 className="!text-[calc(1.325rem_+_0.9vw)] !font-normal font-DMSerif xl:!text-[2rem] !leading-[1.2] !mb-6">Company that believes in the power of creative strategy.</h3>
+                    <h3 className="!text-[calc(1.325rem_+_0.9vw)] !font-normal font-DMSerif xl:!text-[2rem] !leading-[1.2] !mb-6">A platform that redefines workforce flexibility. </h3>
                     <p className="!mb-6">
-                        Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Praesent commodo cursus
-                        magna, vel scelerisque nisl consectetur et.
+                        At Shift Swap System, we believe in creating tools that support both business efficiency and employee satisfaction. Our system is crafted to ease scheduling challenges while giving teams the autonomy they deserve. From healthcare to hospitality, our clients trust us to manage what matters—time. 
                     </p>
                     <div className="flex flex-wrap mx-[-15px] !mt-[-15px] xl:mx-[-20px]">
                         <div className="xl:w-6/12 w-full flex-[0_0_auto] !mt-[15px] xl:!px-[20px] !px-[15px] max-w-full">
@@ -60,13 +59,13 @@ const Services: React.FC = () => {
                                     <span>
                                         <i className="uil uil-check w-4 h-4 text-[0.8rem] leading-none !tracking-[normal] !text-center flex justify-center items-center bg-[#dce7f9] !text-[#3f78e0] rounded-[100%] top-[0.2rem] before:content-['\e9dd'] before:align-middle before:table-cell absolute left-0" />
                                     </span>
-                                    <span>Aenean eu leo quam ornare curabitur blandit tempus.</span>
+                                    <span> Built with user-first experience</span>
                                 </li>
                                 <li className="relative !pl-6 !mt-3">
                                     <span>
                                         <i className="uil uil-check w-4 h-4 text-[0.8rem] leading-none !tracking-[normal] !text-center flex justify-center items-center bg-[#dce7f9] !text-[#3f78e0] rounded-[100%] top-[0.2rem] before:content-['\e9dd'] before:align-middle before:table-cell absolute left-0" />
                                     </span>
-                                    <span>Nullam quis risus eget urna mollis ornare donec elit.</span>
+                                    <span>Tailored for shift-heavy industries</span>
                                 </li>
                             </ul>
                         </div>
@@ -76,13 +75,13 @@ const Services: React.FC = () => {
                                     <span>
                                         <i className="uil uil-check w-4 h-4 text-[0.8rem] leading-none !tracking-[normal] !text-center flex justify-center items-center bg-[#dce7f9] !text-[#3f78e0] rounded-[100%] top-[0.2rem] before:content-['\e9dd'] before:align-middle before:table-cell absolute left-0" />
                                     </span>
-                                    <span>Etiam porta sem malesuada magna mollis euismod.</span>
+                                    <span>Designed for teams of all sizes</span>
                                 </li>
                                 <li className="relative !pl-6 !mt-3">
                                     <span>
                                         <i className="uil uil-check w-4 h-4 text-[0.8rem] leading-none !tracking-[normal] !text-center flex justify-center items-center bg-[#dce7f9] !text-[#3f78e0] rounded-[100%] top-[0.2rem] before:content-['\e9dd'] before:align-middle before:table-cell absolute left-0" />
                                     </span>
-                                    <span>Fermentum massa vivamus faucibus amet euismod.</span>
+                                    <span>Fast onboarding & integration</span>
                                 </li>
                             </ul>
                         </div>

@@ -45,8 +45,8 @@ const Process: React.FC = () => {
                         </span>
                     </div>
                     <div>
-                        <h4 className="!mb-1">Collect Ideas</h4>
-                        <p className="!mb-0">Nulla vitae elit libero pharetra augue dapibus. Praesent commodo cursus.</p>
+                        <h4 className="!mb-1">Setup Your Team</h4>
+                        <p className="!mb-0">Create teams by department, skill, or role. Define shift policies and invite employees.</p>
                     </div>
                 </div>
                 <div className="flex flex-row !mb-6">
@@ -56,8 +56,8 @@ const Process: React.FC = () => {
                         </span>
                     </div>
                     <div>
-                        <h4 className="!mb-1">Data Analysis</h4>
-                        <p className="!mb-0">Vivamus sagittis lacus vel augue laoreet. Etiam porta sem malesuada magna.</p>
+                        <h4 className="!mb-1">Post & Manage Shifts</h4>
+                        <p className="!mb-0">Easily create, publish, and assign shifts. Allow eligible team members to request changes.</p>
                     </div>
                 </div>
                 <div className="flex flex-row">
@@ -67,8 +67,8 @@ const Process: React.FC = () => {
                         </span>
                     </div>
                     <div>
-                        <h4 className="!mb-1">Finalize Product</h4>
-                        <p className="!mb-0">Cras mattis consectetur purus sit amet. Aenean lacinia bibendum nulla sed.</p>
+                        <h4 className="!mb-1">Swap & Approve</h4>
+                        <p className="!mb-0">Employees request swaps. Managers get notified instantly and can approve or reject with a click.</p>
                     </div>
                 </div>
             </div>

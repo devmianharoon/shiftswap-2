@@ -14,7 +14,7 @@ export const metadata: { title: string; description: string } = {
 
 const Page: React.FC = () => {
     return (
-        <div className="font-dm">
+        <div className="font-dm overflow-hidden">
             <div className="grow shrink-0">
                 <Header3 />
                 <section className="wrapper !bg-[#ffffff]">

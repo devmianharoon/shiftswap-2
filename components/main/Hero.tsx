@@ -35,16 +35,16 @@ const Hero: React.FC = () => {
                 data-delay={600}
             >
                 <h1 className="!text-[calc(1.385rem_+_1.62vw)] !font-normal !tracking-[normal] font-DMSerif !leading-[1.1] xl:!text-[2.6rem] !mb-5">
-                    We bring solutions to make life easier for our customers.
+                    We simplify shift management for dynamic teams. 
                 </h1>
-                <p className="lead text-[1.25rem] leading-normal !mb-7 md:!px-10 lg:!px-0">We have considered our solutions to support every stage of your growth.</p>
+                <p className="lead text-[1.25rem] leading-normal !mb-7 md:!px-10 lg:!px-0">From scheduling to seamless shift swaps, we empower your team to manage their work-life balance efficiently. </p>
                 <div className="flex justify-center lg:!justify-start xl:!justify-start" data-cues="slideInDown" data-group="page-title-buttons" data-delay={900}>
                     <span>
                         <Link
                             href="/"
                             className="btn btn-lg !py-[0.4rem] !px-4 btn-primary !text-white !bg-[#3f78e0] border-[#3f78e0] hover:text-white hover:bg-[#3f78e0] hover:!border-[#3f78e0] active:text-white active:bg-[#3f78e0] active:border-[#3f78e0] disabled:text-white disabled:bg-[#3f78e0] disabled:border-[#3f78e0] !rounded-[50rem] !mr-2"
                         >
-                            Explore
+                            Explore Features
                         </Link>
                     </span>
                     <span>
