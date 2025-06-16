@@ -46,7 +46,7 @@ const Page = () => {
         <div className="w-full p-4">
             {/* Header + Create Shift Button */}
             <div className="flex justify-between py-4 items-center border-b">
-                <h2 className="text-[28px]">Swap Requests</h2>
+                <h2 className="text-[28px]">My Swap Requests</h2>
                 <button type="button" onClick={() => setModal2(true)} className="btn btn-info">
                     + Create Swap Request
                 </button>
@@ -97,9 +97,9 @@ const Page = () => {
                     paginatedData.map((item, index) => (
                         <div key={index} className="w-[32%] max-w-[20rem] bg-white shadow rounded border p-5 dark:bg-[#191e3a]">
                             <h5 className="text-lg font-bold mb-3">Swap Request #{item.id}</h5>
-                            <p>
+                            {/* <p>
                               Requested By :  <strong>{item.requested_by} </strong> 
-                            </p>
+                            </p> */}
                             <p>
                                Original Shift : <strong>{item.original_shift}</strong> 
                             </p>
@@ -110,8 +110,8 @@ const Page = () => {
                                Status : <strong></strong> <span className="bg-gray-100 rounded-[34px] px-2 py-1 inline-block">{item.status}</span>
                             </p>
                             <div className="flex gap-2 mt-4">
-                                <button className="btn btn-primary text-sm ">View</button>
-                                <button className="btn btn-outline-primary text-sm">Edit</button>
+                                {/* <button className="btn btn-primary text-sm ">View</button> */}
+                                <button className="btn btn-primary text-sm">Edit</button>
                                 <button className="btn btn-outline-danger text-sm">Cancel</button>
                             </div>
                         </div>

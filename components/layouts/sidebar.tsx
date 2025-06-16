@@ -123,6 +123,22 @@ const Sidebar = () => {
                                             </div>
                                         </Link>
                                     </li>
+                                     <li className="nav-item">
+                                    <Link href="/dashboard/my-swap-requests" className="group">
+                                        <div className="flex items-center">
+                                            <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('My Swap Requests')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link href="/dashboard/manage-swap-requests" className="group">
+                                        <div className="flex items-center">
+                                            <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Manage Swap Requests')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
                                 </ul>
                             </li>
 
@@ -187,7 +203,7 @@ const Sidebar = () => {
                                     </Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link href="/dashboard/swap-request" className="group">
+                                    <Link href="/dashboard/swap-requests" className="group">
                                         <div className="flex items-center">
                                             <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
                                             <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Swap Requests')}</span>
