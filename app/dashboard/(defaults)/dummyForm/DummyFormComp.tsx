@@ -149,7 +149,7 @@ export default function dummyFormComp() {
                     Submit Request
                 </button>
                 <button type="submit" className=" text-black px-11 py-2 rounded border border-gray-200">
-                    Submit Request
+                    Cancel
                 </button>
             </div>
         </form>
