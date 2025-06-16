@@ -113,16 +113,24 @@ const Sidebar = () => {
                                     </div>
                                 </Link>
                             </li>
+                             <li className="nav-item">
+                                    <Link href="/dashboard/swap-requests" className="group">
+                                        <div className="flex items-center">
+                                            <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Swap Requests')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
                             <li className="nav-item">
                                 <ul>
-                                    <li className="nav-item">
+                                    {/* <li className="nav-item">
                                         <Link href="/dashboard/apps/chat" className="group">
                                             <div className="flex items-center">
                                                 <CalendarClock className="shrink-0 group-hover:!text-primary" />
                                                 <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('My Shifts')}</span>
                                             </div>
                                         </Link>
-                                    </li>
+                                    </li> */}
                                      <li className="nav-item">
                                     <Link href="/dashboard/my-swap-requests" className="group">
                                         <div className="flex items-center">
@@ -136,6 +144,14 @@ const Sidebar = () => {
                                         <div className="flex items-center">
                                             <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
                                             <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Manage Swap Requests')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+                                 <li className="nav-item">
+                                    <Link href="/dashboard/apps/calendar" className="group">
+                                        <div className="flex items-center">
+                                            <CalendarClock className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Shifts')}</span>
                                         </div>
                                     </Link>
                                 </li>
@@ -154,14 +170,14 @@ const Sidebar = () => {
 
                                 <AnimateHeight duration={300} height={currentMenu === 'analytics' ? 'auto' : 0}></AnimateHeight>
                             </li>
-                            <li className="nav-item">
+                            {/* <li className="nav-item">
                                 <Link href="/dashboard/apps/contacts" className="group">
                                     <div className="flex items-center">
                                         <Users2 className="shrink-0 group-hover:!text-primary" />
                                         <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Teams')}</span>
                                     </div>
                                 </Link>
-                            </li>
+                            </li> */}
                             <li className="nav-item">
                                 <Link href="/dashboard/groups" className="group">
                                     <div className="flex items-center">
@@ -169,22 +185,22 @@ const Sidebar = () => {
                                         <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Groups')}</span>
                                     </div>
                                 </Link>
-                                <li className="nav-item">
+                                {/* <li className="nav-item">
                                     <Link href="/dashboard/apps/contacts" className="group">
                                         <div className="flex items-center">
                                             <FileBarChart className="shrink-0 group-hover:!text-primary" />
                                             <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Reports')}</span>
                                         </div>
                                     </Link>
-                                </li>
-                                <li className="nav-item">
+                                </li> */}
+                                {/* <li className="nav-item">
                                     <Link href="/dashboard/apps/contacts" className="group">
                                         <div className="flex items-center">
                                             <Settings className="shrink-0 group-hover:!text-primary" />
                                             <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Settings')}</span>
                                         </div>
                                     </Link>
-                                </li>
+                                </li> */}
 
                                 <li className="nav-item">
                                     <Link href="/dashboard/members" className="group">
@@ -194,22 +210,8 @@ const Sidebar = () => {
                                         </div>
                                     </Link>
                                 </li>
-                                <li className="nav-item">
-                                    <Link href="/dashboard/apps/calendar" className="group">
-                                        <div className="flex items-center">
-                                            <CalendarClock className="shrink-0 group-hover:!text-primary" />
-                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Shifts')}</span>
-                                        </div>
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link href="/dashboard/swap-requests" className="group">
-                                        <div className="flex items-center">
-                                            <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
-                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Swap Requests')}</span>
-                                        </div>
-                                    </Link>
-                                </li>
+                               
+                               
                             </li>
                         </ul>
                     </PerfectScrollbar>
