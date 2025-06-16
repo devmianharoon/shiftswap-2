@@ -33,8 +33,7 @@ import IconMenuAuthentication from '@/components/icon/menu/icon-menu-authenticat
 import IconMenuDocumentation from '@/components/icon/menu/icon-menu-documentation';
 import { usePathname } from 'next/navigation';
 import { getTranslation } from '@/i18n';
-import { LayoutDashboard, CalendarClock, Users2, Layers3, FileBarChart, Settings, UserRound } from 'lucide-react';
-
+import { ArrowLeftRight, LayoutDashboard, CalendarClock, Users2, Layers3, FileBarChart, Settings, UserRound } from 'lucide-react';
 
 const Sidebar = () => {
     const dispatch = useDispatch();
@@ -142,7 +141,7 @@ const Sidebar = () => {
                             <li className="nav-item">
                                 <Link href="/dashboard/apps/contacts" className="group">
                                     <div className="flex items-center">
-                                        <Users2  className="shrink-0 group-hover:!text-primary" />
+                                        <Users2 className="shrink-0 group-hover:!text-primary" />
                                         <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Teams')}</span>
                                     </div>
                                 </Link>
@@ -180,13 +179,21 @@ const Sidebar = () => {
                                     </Link>
                                 </li>
                                 <li className="nav-item">
-                                        <Link href="/dashboard/apps/calendar" className="group">
-                                            <div className="flex items-center">
-                                                <CalendarClock className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Shifts')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
+                                    <Link href="/dashboard/apps/calendar" className="group">
+                                        <div className="flex items-center">
+                                            <CalendarClock className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Shifts')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link href="/dashboard/apps/calendar" className="group">
+                                        <div className="flex items-center">
+                                            <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Swap Requests')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
                             </li>
                         </ul>
                     </PerfectScrollbar>
