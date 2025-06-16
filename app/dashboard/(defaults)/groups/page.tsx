@@ -72,14 +72,14 @@ const table = () => {
                                             </div>
                                             <div className="p-5">
                                                 <div>
-                                                    <FormComp />
+                                                    <FormComp  />
                                                 </div>
                                                 <div className="flex justify-end items-center mt-8">
-                                                    <button type="button" className="btn btn-outline-danger" onClick={() => setModal2(false)}>
+                                                    {/* <button type="button" className="btn btn-outline-danger" onClick={() => setModal2(false)}>
                                                         Discard
-                                                    </button>
+                                                    </button> */}
                                                     <button type="button" className="btn btn-primary ltr:ml-4 rtl:mr-4" onClick={() => setModal2(false)}>
-                                                        Save
+                                                        Close
                                                     </button>
                                                 </div>
                                             </div>
