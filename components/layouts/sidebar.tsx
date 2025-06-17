@@ -130,7 +130,7 @@ const Sidebar = () => {
                                             </div>
                                         </Link>
                                     </li> */}
-                                    {parsedUserData.account_type === 'member' && (
+                                    {parsedUserData.roles?.some((role: string) => ['authenticated'].includes(role)) && (
                                         <>
                                             <li className="nav-item">
                                                 <Link href="/dashboard/swap-requests" className="group">
@@ -148,17 +148,9 @@ const Sidebar = () => {
                                                     </div>
                                                 </Link>
                                             </li>
-                                            <li className="nav-item">
-                                                <Link href="/dashboard/apps/calendar" className="group">
-                                                    <div className="flex items-center">
-                                                        <CalendarClock className="shrink-0 group-hover:!text-primary" />
-                                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Shifts')}</span>
-                                                    </div>
-                                                </Link>
-                                            </li>
                                         </>
                                     )}
-                                    {parsedUserData.account_type === 'business' && (
+                                    {parsedUserData.roles?.some((role: string) => ['business_admin'].includes(role)) && (
                                         <>
                                             <li className="nav-item">
                                                 <Link href="/dashboard/manage-swap-requests" className="group">
