@@ -53,17 +53,23 @@ const Profile = () => {
                             </div>
                             <div className="flex">
                                 <ul className="m-auto mt-5 flex  flex-col space-y-4 font-semibold text-white-dark">
-                                    <li className="flex items-center gap-2 capitalize">
-                                        <IconCoffee className="shrink-0" /> Account Type: {parsedUserData.account_type}
-                                    </li>
-                                    <li className="flex items-center gap-2 capitalize">
-                                        <IconCalendar className="shrink-0" />
-                                        Business Name: {parsedUserData.business_name}
-                                    </li>
-                                    <li className="flex items-center gap-2 capitalize">
-                                        <IconMapPin className="shrink-0" />
-                                        Business Type: {parsedUserData.business_type.name}
-                                    </li>
+                                    {parsedUserData.account_type && (
+                                        <li className="flex items-center gap-2 capitalize">
+                                            <IconCoffee className="shrink-0" /> Account Type: {parsedUserData.account_type}
+                                        </li>
+                                    )}
+                                    {parsedUserData.business_name && (
+                                        <li className="flex items-center gap-2 capitalize">
+                                            <IconCalendar className="shrink-0" />
+                                            Business Name: {parsedUserData.business_name}
+                                        </li>
+                                    )}
+                                    {parsedUserData.business_type && parsedUserData.business_type.name && (
+                                        <li className="flex items-center gap-2 capitalize">
+                                            <IconMapPin className="shrink-0" />
+                                            <span>Business Type: {parsedUserData.business_type.name}</span>
+                                        </li>
+                                    )}
                                     <li>
                                         <button className="flex items-center gap-2">
                                             <IconMail className="h-5 w-5 shrink-0" />
@@ -80,10 +86,12 @@ const Profile = () => {
                                         </span>
                                     </li>
 
-                                    <li className="flex items-center gap-2 ">
-                                        <IconMapPin className="shrink-0" />
-                                        Secret Key: {parsedUserData.secret_key}
-                                    </li>
+                                    {parsedUserData.secret_key && (
+                                        <li className="flex items-center gap-2 ">
+                                            <IconMapPin className="shrink-0" />
+                                            Secret Key: {parsedUserData.secret_key}
+                                        </li>
+                                    )}
                                 </ul>
                             </div>
                             <ul className="mt-7 flex items-center justify-center gap-2">
