@@ -166,7 +166,10 @@ const Header = () => {
                     <div className="hidden ltr:mr-2 rtl:ml-2 sm:block">
                         <ul className="flex items-center space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                             <li>
-                                <Link href="/dashboard/apps/calendar" className="block rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60">
+                                <Link
+                                    href="/dashboard/apps/calendar"
+                                    className="block rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60"
+                                >
                                     <IconCalendar />
                                 </Link>
                             </li>
@@ -427,12 +430,12 @@ const Header = () => {
                                         </div>
                                     </li>
                                     <li>
-                                        <Link href="/users/profile" className="dark:hover:text-white">
+                                        <Link href="/dashboard/users/profile" className="dark:hover:text-white">
                                             <IconUser className="h-4.5 w-4.5 shrink-0 ltr:mr-2 rtl:ml-2" />
                                             Profile
                                         </Link>
                                     </li>
-                            
+
                                     <li className="border-t border-white-light dark:border-white-light/10">
                                         <Link href="/" className="!py-3 text-danger">
                                             <IconLogout className="h-4.5 w-4.5 shrink-0 rotate-90 ltr:mr-2 rtl:ml-2" />
@@ -787,7 +790,7 @@ const Header = () => {
                                 </button>
                                 <ul className="absolute top-0 z-[10] hidden min-w-[180px] rounded bg-white p-0 py-2 text-dark shadow ltr:left-[95%] rtl:right-[95%] dark:bg-[#1b2e4b] dark:text-white-dark">
                                     <li>
-                                        <Link href="/users/profile">{t('profile')}</Link>
+                                        <Link href="/dashboard/users/profile">{t('profile')}</Link>
                                     </li>
                                     <li>
                                         <Link href="/users/user-account-settings">{t('account_settings')}</Link>
