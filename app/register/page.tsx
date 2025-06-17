@@ -21,6 +21,12 @@ interface CompanyDetails {
         uid: string;
     };
 }
+interface Skill {
+    id: string;
+    name: string;
+    pid: string;
+}
+
 const RegisterPage = () => {
     const searchParams = useSearchParams();
     const role = searchParams.get('type'); // 'owner' or 'employee'
@@ -78,6 +84,17 @@ const RegisterPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [registrationComplete, setRegistrationComplete] = useState(false);
     const [companyDetails, setCompanyDetails] = useState<CompanyDetails | null>(null);
+
+    const [businessTypesData, setBusinessTypesData] = useState<Skill[]>([]);
+
+    useEffect(() => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/business_types_and_skills`)
+            .then((res) => res.json())
+            .then((data) => setBusinessTypesData(data.filter((item: Skill) => !item.pid)))
+            .catch((err) => console.error('Error fetching skills:', err));
+    }, []);
+
+    console.log(businessTypesData);
 
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     const totalSteps = 2;
@@ -380,12 +397,12 @@ const RegisterPage = () => {
                                         errors.businessType ? 'border-red-500' : 'border-gray-300'
                                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white pr-10`}
                                 >
-                                    <option value="">What kind of business is it?</option>
-                                    <option value="restaurant">Restaurant</option>
-                                    <option value="retail">Retail</option>
-                                    <option value="healthcare">Healthcare</option>
-                                    <option value="service">Service Business</option>
-                                    <option value="other">Other</option>
+                                    <option value="" disabled>
+                                        Select an option
+                                    </option>
+                                    {businessTypesData.map((item) => (
+                                        <option value={item.id}>{item.name}</option>
+                                    ))}
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -604,6 +621,7 @@ const RegisterPage = () => {
                 return null;
         }
     };
+
     // Employee Registration Step
     const renderStepE = () => {
         switch (currentStep) {
