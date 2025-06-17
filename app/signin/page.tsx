@@ -30,7 +30,7 @@ export default function Page() {
                 localStorage.setItem('user', JSON.stringify(user));
                 
             }
-            router.push('/dashboard');
+            router.push('/dashboard/users/profile');
         } catch (err) {
             console.error('Login failed:', err);
         }

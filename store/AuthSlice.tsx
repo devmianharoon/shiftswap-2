@@ -22,28 +22,21 @@ export const loginUser = createAsyncThunk<
   "auth/loginUser",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      // First, fetch the CSRF token
-      const csrfResponse = await axios.get<string>(
-        `${process.env.NEXT_PUBLIC_API_URL}/session/token`
-      );
-      const csrfToken = csrfResponse.data;
-
-      // Then, make the login request with the CSRF token
       const response = await axios.post<LoginResponse>(
-        `${process.env.NEXT_PUBLIC_API_URL}/user/login?_format=json`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/user/login  `,
         {
-          name: email,
-          pass: password,
+          username: email,  // Changed from "name" to "username"
+          password: password, // Changed from "pass" to "password"
         },
         {
           headers: {
-            "X-CSRF-Token": csrfToken,
             "Content-Type": "application/json",
-            Accept: "application/json",
           },
+          // Optional if you need to include cookies
+          withCredentials: true,
         }
       );
-      // console.log("Login response:", response.data);
+
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -52,6 +45,45 @@ export const loginUser = createAsyncThunk<
     }
   }
 );
+
+// export const loginUser = createAsyncThunk<
+//   LoginResponse,
+//   LoginCredentials,
+//   { rejectValue: string }
+// >(
+//   "auth/loginUser",
+//   async ({ email, password }, { rejectWithValue }) => {
+//     try {
+//       // First, fetch the CSRF token
+//       const csrfResponse = await axios.get<string>(
+//         `${process.env.NEXT_PUBLIC_API_URL}/session/token`
+//       );
+//       const csrfToken = csrfResponse.data;
+
+//       // Then, make the login request with the CSRF token
+//       const response = await axios.post<LoginResponse>(
+//         `${process.env.NEXT_PUBLIC_API_URL}/user/login?_format=json`,
+//         {
+//           name: email,
+//           pass: password,
+//         },
+//         {
+//           headers: {
+//             "X-CSRF-Token": csrfToken,
+//             "Content-Type": "application/json",
+//             Accept: "application/json",
+//           },
+//         }
+//       );
+//       // console.log("Login response:", response.data);
+//       return response.data;
+//     } catch (error: any) {
+//       return rejectWithValue(
+//         error.response?.data?.message || "Login failed"
+//       );
+//     }
+//   }
+// );
 
 // Define the auth state type
 interface AuthState {
