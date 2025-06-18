@@ -9,22 +9,21 @@ import IconTwitter from '@/components/icon/icon-twitter';
 import IconUser from '@/components/icon/icon-user';
 import IconUserPlus from '@/components/icon/icon-user-plus';
 import IconX from '@/components/icon/icon-x';
+import { fetchCompanyMembers } from '@/store/MembersSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import { Transition, Dialog, TransitionChild, DialogPanel } from '@headlessui/react';
+import Cookies from 'js-cookie';
 import React, { Fragment, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
+import { AppDispatch, IRootState } from '@/store';
 
 interface Contact {
-    id: number;
-    path: string;
+    uid: number;
     name: string;
-    role: string;
     email: string;
-    roletype: string;
-    posts: number;
-    followers: string;
-    following: number;
-    phone?: string;
-    location?: string;
+    phone: string;
+    roles: string[];
+    profile?: string;
 }
 
 interface Params {
@@ -32,8 +31,7 @@ interface Params {
     name: string;
     email: string;
     phone: string;
-    role: string;
-    location: string;
+    roles: string;
 }
 
 interface Role {
@@ -45,13 +43,23 @@ const UserComponent: React.FC = () => {
     const [addContactModal, setAddContactModal] = useState<boolean>(false);
     const [assignRoleModal, setAssignRoleModal] = useState<boolean>(false);
     const [value, setValue] = useState<'list' | 'grid'>('list');
+    const userData = localStorage.getItem('user_data');
+    const parsedUserData = userData ? JSON.parse(userData) : null;
+    const { members } = useSelector((state: IRootState) => state.members);
+    const dispatch = useDispatch<AppDispatch>();
+
+    useEffect(() => {
+        if (parsedUserData?.company?.id) {
+            dispatch(fetchCompanyMembers(parsedUserData.company.id));
+        }
+    }, [dispatch, parsedUserData?.company?.id]);
+
     const [defaultParams] = useState<Params>({
         id: null,
         name: '',
         email: '',
         phone: '',
-        role: '',
-        location: '',
+        roles: '',
     });
     const [params, setParams] = useState<Params>(JSON.parse(JSON.stringify(defaultParams)));
     const [search, setSearch] = useState<string>('');
@@ -60,153 +68,25 @@ const UserComponent: React.FC = () => {
     const [roles, setRoles] = useState<Role[]>([]);
     const [loadingRoles, setLoadingRoles] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [filteredItems, setFilteredItems] = useState<Contact[]>(members);
+    const [assigningRoles, setAssigningRoles] = useState<boolean>(false);
 
-    const [contactList] = useState<Contact[]>([
-        {
-            id: 1,
-            path: 'profile-35.png',
-            name: 'Alan Green',
-            role: 'Web Developer',
-            email: 'alan@mail.com',
-            roletype: 'Marketing',
-            posts: 25,
-            followers: '5K',
-            following: 500,
-        },
-        {
-            id: 2,
-            path: 'profile-35.png',
-            name: 'Linda Nelson',
-            role: 'Web Designer',
-            email: 'linda@mail.com',
-            roletype: 'Developer',
-            posts: 25,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 3,
-            path: 'profile-35.png',
-            name: 'Lila Perry',
-            role: 'UX/UI Designer',
-            email: 'lila@mail.com',
-            roletype: 'Marketing',
-            posts: 20,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 4,
-            path: 'profile-35.png',
-            name: 'Andy King',
-            role: 'Project Lead',
-            email: 'andy@mail.com',
-            roletype: 'Marketing',
-            posts: 25,
-            followers: '21.5K',
-            following: 300,
-        },
-        {
-            id: 5,
-            path: 'profile-35.png',
-            name: 'Jesse Cory',
-            role: 'Web Developer',
-            email: 'jesse@mail.com',
-            roletype: 'Marketing',
-            posts: 30,
-            followers: '20K',
-            following: 350,
-        },
-        {
-            id: 6,
-            path: 'profile-35.png',
-            name: 'Xavier',
-            role: 'UX/UI Designer',
-            email: 'xavier@mail.com',
-            roletype: 'Marketing',
-            posts: 25,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 7,
-            path: 'profile-35.png',
-            name: 'Susan',
-            role: 'Project Manager',
-            email: 'susan@mail.com',
-            roletype: 'Marketing',
-            posts: 40,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 8,
-            path: 'profile-35.png',
-            name: 'Raci Lopez',
-            role: 'Web Developer',
-            email: 'traci@mail.com',
-            roletype: 'Marketing',
-            posts: 25,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 9,
-            path: 'profile-35.png',
-            name: 'Steven Mendoza',
-            role: 'HR',
-            email: 'sokol@verizon.net',
-            roletype: 'Marketing',
-            posts: 40,
-            followers: '21.8K',
-            following: 300,
-        },
-        {
-            id: 10,
-            path: 'profile-35.png',
-            name: 'James Cantrell',
-            role: 'Web Developer',
-            email: 'sravani@comcast.net',
-            roletype: 'Marketing',
-            posts: 100,
-            followers: '28K',
-            following: 520,
-        },
-        {
-            id: 11,
-            path: 'profile-35.png',
-            name: 'Reginald Brown',
-            role: 'Web Designer',
-            email: 'drhyde@gmail.com',
-            roletype: 'Marketing',
-            posts: 35,
-            followers: '25K',
-            following: 500,
-        },
-        {
-            id: 12,
-            path: 'profile-35.png',
-            name: 'Stacey Smith',
-            role: 'Chief technology officer',
-            email: 'maikelnai@optonline.net',
-            roletype: 'Marketing',
-            posts: 21,
-            followers: '5K',
-            following: 200,
-        },
-    ]);
-
-    const [filteredItems, setFilteredItems] = useState<Contact[]>(contactList);
+    // Update filteredItems when members or search changes
+    useEffect(() => {
+        setFilteredItems(() => members.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())));
+    }, [search, members]);
 
     // Fetch roles from API on component mount
     useEffect(() => {
         const fetchRoles = async () => {
             try {
                 setLoadingRoles(true);
+                const token = Cookies.get('token');
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/allowed_roles`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
+                        ...(token && { Authorization: `Bearer ${token}` }),
                     },
                 });
                 if (!response.ok) {
@@ -218,7 +98,7 @@ const UserComponent: React.FC = () => {
             } catch (err: any) {
                 setError('Failed to fetch roles. Please try again later.');
                 showMessage('Failed to fetch roles.', 'error');
-                setRoles([]); // Fallback to empty array
+                setRoles([]);
             } finally {
                 setLoadingRoles(false);
             }
@@ -227,18 +107,54 @@ const UserComponent: React.FC = () => {
         fetchRoles();
     }, []);
 
+    // Assign roles to selected members
+    const assignRoles = async () => {
+        if (!selectedRole) {
+            showMessage('Please select a role.', 'error');
+            return;
+        }
+        if (selectedItems.length === 0) {
+            showMessage('Please select at least one member.', 'error');
+            return;
+        }
+
+        try {
+            setAssigningRoles(true);
+            const token = Cookies.get('token');
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/role_assignment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+                body: JSON.stringify({
+                    user_id: selectedItems,
+                    roles: [selectedRole],
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            // Update filteredItems with new roles
+            setFilteredItems((prev) => prev.map((item) => (selectedItems.includes(item.uid) ? { ...item, roles: [selectedRole] } : item)));
+
+            showMessage('Roles assigned successfully.', 'success');
+            setSelectedItems([]);
+            setSelectedRole('');
+            setAssignRoleModal(false);
+        } catch (err: any) {
+            showMessage('Failed to assign roles. Please try again.', 'error');
+        } finally {
+            setAssigningRoles(false);
+        }
+    };
+
     const changeValue = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { value, id } = e.target;
         setParams({ ...params, [id]: value });
     };
-
-    const searchContact = () => {
-        setFilteredItems(() => contactList.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())));
-    };
-
-    useEffect(() => {
-        searchContact();
-    }, [search]);
 
     const saveUser = () => {
         if (!params.name) {
@@ -253,8 +169,8 @@ const UserComponent: React.FC = () => {
             showMessage('Phone is required.', 'error');
             return;
         }
-        if (!params.role) {
-            showMessage('Occupation is required.', 'error');
+        if (!params.roles) {
+            showMessage('Role is required.', 'error');
             return;
         }
 
@@ -262,33 +178,26 @@ const UserComponent: React.FC = () => {
             // Update user
             setFilteredItems((prev) =>
                 prev.map((user) =>
-                    user.id === params.id
+                    user.uid === params.id
                         ? {
                               ...user,
                               name: params.name,
                               email: params.email,
                               phone: params.phone,
-                              role: params.role,
-                              location: params.location,
+                              roles: [params.roles],
                           }
                         : user,
                 ),
             );
         } else {
             // Add user
-            const maxUserId = filteredItems.length ? Math.max(...filteredItems.map((item) => item.id)) : 0;
+            const maxUserId = filteredItems.length ? Math.max(...filteredItems.map((item) => item.uid)) : 0;
             const newUser: Contact = {
-                id: maxUserId + 1,
-                path: 'profile-35.png',
+                uid: maxUserId + 1,
                 name: params.name,
                 email: params.email,
                 phone: params.phone,
-                role: params.role,
-                location: params.location,
-                posts: 20,
-                followers: '5K',
-                following: 500,
-                roletype: 'Marketing',
+                roles: [params.roles],
             };
             setFilteredItems([newUser, ...filteredItems]);
         }
@@ -302,20 +211,19 @@ const UserComponent: React.FC = () => {
         setParams(json);
         if (user) {
             setParams({
-                id: user.id,
+                id: user.uid,
                 name: user.name,
                 email: user.email,
-                phone: user.phone || '',
-                role: user.role,
-                location: user.location || '',
+                phone: user.phone,
+                roles: user.roles[0] || '',
             });
         }
         setAddContactModal(true);
     };
 
     const deleteUser = (user: Contact) => {
-        setFilteredItems(filteredItems.filter((d) => d.id !== user.id));
-        setSelectedItems(selectedItems.filter((id) => id !== user.id));
+        setFilteredItems(filteredItems.filter((d) => d.uid !== user.uid));
+        setSelectedItems(selectedItems.filter((id) => id !== user.uid));
         showMessage('User has been deleted successfully.');
     };
 
@@ -395,37 +303,38 @@ const UserComponent: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredItems.map((contact) => (
-                                    <tr key={contact.id}>
+                                {filteredItems.map((member) => (
+                                    <tr key={member.uid}>
                                         <td>
                                             <div className="flex w-max items-center">
-                                                {contact.path && (
+                                                {member.name && (
                                                     <div className="w-max">
-                                                        <img src={`/assets/images/${contact.path}`} className="h-8 w-8 rounded-full object-cover ltr:mr-2 rtl:ml-2" alt="avatar" />
+                                                        <img
+                                                            src={`https://drupal-shift-swap.asdev.tech/sites/default/files${member.profile}`}
+                                                            className="h-8 w-8 rounded-full object-cover ltr:mr-2 rtl:ml-2"
+                                                            alt="avatar"
+                                                        />
                                                     </div>
                                                 )}
-                                                {!contact.path && contact.name && (
-                                                    <div className="grid h-8 w-8 place-content-center rounded-full bg-primary text-sm font-semibold text-white ltr:mr-2 rtl:ml-2"></div>
-                                                )}
-                                                {!contact.path && !contact.name && (
+                                                {!member.name && (
                                                     <div className="rounded-full border border-gray-300 p-2 ltr:mr-2 rtl:ml-2 dark:border-gray-800">
                                                         <IconUser className="h-4.5 w-4.5" />
                                                     </div>
                                                 )}
-                                                <div>{contact.name}</div>
+                                                <div>{member.name}</div>
                                             </div>
                                         </td>
-                                        <td>{contact.email}</td>
-                                        <td className="whitespace-nowrap">{contact.role}</td>
+                                        <td>{member.email}</td>
+                                        <td className="whitespace-nowrap">{member.roles.join(', ')}</td>
                                         <td>
                                             <div className="flex items-center justify-center gap-4">
-                                                <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => editUser(contact)}>
+                                                <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => editUser(member)}>
                                                     Edit
                                                 </button>
-                                                <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => deleteUser(contact)}>
+                                                <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => deleteUser(member)}>
                                                     Delete
                                                 </button>
-                                                <input type="checkbox" checked={selectedItems.includes(contact.id)} onChange={() => handleCheckboxChange(contact.id)} className="form-checkbox" />
+                                                <input type="checkbox" checked={selectedItems.includes(member.uid)} onChange={() => handleCheckboxChange(member.uid)} className="form-checkbox" />
                                             </div>
                                         </td>
                                     </tr>
@@ -438,29 +347,17 @@ const UserComponent: React.FC = () => {
 
             {value === 'grid' && (
                 <div className="mt-5 grid w-full grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                    {filteredItems.map((contact) => (
-                        <div className="relative overflow-hidden rounded-md bg-white text-center shadow dark:bg-[#1c232f]" key={contact.id}>
+                    {filteredItems.map((member) => (
+                        <div className="relative overflow-hidden rounded-md bg-white text-center shadow dark:bg-[#1c232f]" key={member.uid}>
                             <div className="rounded-t-md bg-white/40 bg-[url('/assets/images/notification-bg.png')] bg-cover bg-center p-6 pb-0">
-                                <img className="mx-auto max-h-40 w-4/5 object-contain" src={`/assets/images/${contact.path}`} alt="contact_image" />
+                                <div className="mx-auto h-40 w-40 rounded-full bg-primary text-4xl font-semibold text-white flex items-center justify-center">
+                                    {member.name.charAt(0).toUpperCase()}
+                                </div>
                             </div>
                             <div className="relative -mt-10 px-6 pb-24">
                                 <div className="rounded-md bg-white px-2 py-4 shadow-md dark:bg-gray-900">
-                                    <div className="text-xl">{contact.name}</div>
-                                    <div className="text-white-dark">{contact.role}</div>
-                                    <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-                                        <div className="flex-auto">
-                                            <div className="text-info">{contact.posts}</div>
-                                            <div>Posts</div>
-                                        </div>
-                                        <div className="flex-auto">
-                                            <div className="text-info">{contact.following}</div>
-                                            <div>Following</div>
-                                        </div>
-                                        <div className="flex-auto">
-                                            <div className="text-info">{contact.followers}</div>
-                                            <div>Followers</div>
-                                        </div>
-                                    </div>
+                                    <div className="text-xl">{member.name}</div>
+                                    <div className="text-white-dark">{member.roles.join(', ')}</div>
                                     <div className="mt-4">
                                         <ul className="flex items-center justify-center space-x-4 rtl:space-x-reverse">
                                             <li>
@@ -489,26 +386,22 @@ const UserComponent: React.FC = () => {
                                 <div className="mt-6 grid grid-cols-1 gap-4 ltr:text-left rtl:text-right">
                                     <div className="flex items-center">
                                         <div className="flex-none ltr:mr-2 rtl:ml-2">Email :</div>
-                                        <div className="truncate text-white-dark">{contact.email}</div>
+                                        <div className="truncate text-white-dark">{member.email}</div>
                                     </div>
                                     <div className="flex items-center">
                                         <div className="flex-none ltr:mr-2 rtl:ml-2">Phone :</div>
-                                        <div className="text-white-dark">{contact.phone || '-'}</div>
-                                    </div>
-                                    <div className="flex items-center">
-                                        <div className="flex-none ltr:mr-2 rtl:ml-2">Address :</div>
-                                        <div className="text-white-dark">{contact.location || '-'}</div>
+                                        <div className="text-white-dark">{member.phone}</div>
                                     </div>
                                 </div>
                             </div>
                             <div className="absolute bottom-0 mt-6 flex w-full gap-4 p-6 ltr:left-0 rtl:right-0">
-                                <button type="button" className="btn btn-outline-primary w-1/2" onClick={() => editUser(contact)}>
+                                <button type="button" className="btn btn-outline-primary w-1/2" onClick={() => editUser(member)}>
                                     Edit
                                 </button>
-                                <button type="button" className="btn btn-outline-danger w-1/2" onClick={() => deleteUser(contact)}>
+                                <button type="button" className="btn btn-outline-danger w-1/2" onClick={() => deleteUser(member)}>
                                     Delete
                                 </button>
-                                <input type="checkbox" checked={selectedItems.includes(contact.id)} onChange={() => handleCheckboxChange(contact.id)} className="form-checkbox" />
+                                <input type="checkbox" checked={selectedItems.includes(member.uid)} onChange={() => handleCheckboxChange(member.uid)} className="form-checkbox" />
                             </div>
                         </div>
                     ))}
@@ -558,19 +451,8 @@ const UserComponent: React.FC = () => {
                                                 <input id="phone" type="text" placeholder="Enter Phone Number" className="form-input" value={params.phone} onChange={changeValue} />
                                             </div>
                                             <div className="mb-5">
-                                                <label htmlFor="occupation">Occupation</label>
-                                                <input id="role" type="text" placeholder="Enter Occupation" className="form-input" value={params.role} onChange={changeValue} />
-                                            </div>
-                                            <div className="mb-5">
-                                                <label htmlFor="address">Address</label>
-                                                <textarea
-                                                    id="location"
-                                                    rows={3}
-                                                    placeholder="Enter Address"
-                                                    className="form-textarea min-h-[130px] resize-none"
-                                                    value={params.location}
-                                                    onChange={changeValue}
-                                                ></textarea>
+                                                <label htmlFor="roles">Role</label>
+                                                <input id="roles" type="text" placeholder="Enter Role" className="form-input" value={params.roles} onChange={changeValue} />
                                             </div>
                                             <div className="mt-8 flex items-center justify-end">
                                                 <button type="button" className="btn btn-outline-danger" onClick={() => setAddContactModal(false)}>
@@ -614,9 +496,7 @@ const UserComponent: React.FC = () => {
                                     >
                                         <IconX />
                                     </button>
-                                    <div className="bg-[#fbfbfb] py-3 text-lg font-medium ltr:pl-5 ltr:pr-[50px] rtl:pl-[50px] rtl:pr-5 dark:bg-[#121c2c]">
-                                        Assign Role
-                                    </div>
+                                    <div className="bg-[#fbfbfb] py-3 text-lg font-medium ltr:pl-5 ltr:pr-[50px] rtl:pl-[50px] rtl:pr-5 dark:bg-[#121c2c]">Assign Role</div>
                                     <div className="p-5">
                                         <form>
                                             <div className="mb-5">
@@ -649,8 +529,8 @@ const UserComponent: React.FC = () => {
                                                 <button type="button" className="btn btn-outline-danger" onClick={() => setAssignRoleModal(false)}>
                                                     Cancel
                                                 </button>
-                                                <button type="button" className="btn btn-primary ltr:ml-4 rtl:mr-4">
-                                                    Confirm
+                                                <button type="button" className="btn btn-primary ltr:ml-4 rtl:mr-4" onClick={assignRoles} disabled={assigningRoles}>
+                                                    {assigningRoles ? 'Assigning...' : 'Confirm'}
                                                 </button>
                                             </div>
                                         </form>
