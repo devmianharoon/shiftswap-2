@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import IconMenu from '@/components/icon/icon-menu';
 import IconMessage from '@/components/icon/icon-message';
@@ -33,8 +33,12 @@ interface ChatProps {
     loginUserId: string | string[];
 }
 
-const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
-    const userId = typeof loginUserId === 'string' ? loginUserId : loginUserId[0];
+const ComponentsAppsChat = () => {
+    // Retrieve current_user from cookies
+    const userdata = localStorage.getItem('user_data');
+    const userDataPars = userdata ? JSON.parse(userdata) : {};
+    const userId = String(userDataPars.uid); // Ensure this is a string
+    // const userId = typeof loginUserId === 'string' ? loginUserId : loginUserId[0];
     const [selectedUser, setSelectedUser] = useState<Contact | null>(null);
     const { messages, sendMessage } = useChat(userId, selectedUser?.userId || null);
     const dispatch = useDispatch<AppDispatch>();
@@ -147,9 +151,7 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
     };
 
     // Derive filtered items based on search
-    const filteredItems = contactList.filter((d) =>
-        d.name.toLowerCase().includes(searchUser.toLowerCase())
-    );
+    const filteredItems = contactList.filter((d) => d.name.toLowerCase().includes(searchUser.toLowerCase()));
 
     return (
         <div>
@@ -167,13 +169,7 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                         </div>
                     </div>
                     <div className="relative">
-                        <input
-                            type="text"
-                            className="peer form-input ltr:pr-9 rtl:pl-9"
-                            placeholder="Searching..."
-                            value={searchUser}
-                            onChange={(e) => setSearchUser(e.target.value)}
-                        />
+                        <input type="text" className="peer form-input ltr:pr-9 rtl:pl-9" placeholder="Searching..." value={searchUser} onChange={(e) => setSearchUser(e.target.value)} />
                         <div className="absolute top-1/2 -translate-y-1/2 peer-focus:text-primary ltr:right-2 rtl:left-2">
                             <IconSearch />
                         </div>
@@ -183,41 +179,39 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                         {loading && <p className="text-gray-600">Loading members...</p>}
                         {error && <p className="text-red-500">{error}</p>}
                         <PerfectScrollbar className="chat-users relative h-full min-h-[100px] space-y-0.5 ltr:-mr-3.5 ltr:pr-3.5 rtl:-ml-3.5 rtl:pl-3.5 sm:h-[calc(100vh_-_357px)]">
-                            {filteredItems.length > 0 ? (
-                                filteredItems.map((person) => (
-                                    <div key={person.userId}>
-                                        <button
-                                            type="button"
-                                            className={`flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100 hover:text-primary dark:hover:bg-[#050b14] dark:hover:text-primary ${
-                                                selectedUser && selectedUser.userId === person.userId ? 'bg-gray-100 text-primary dark:bg-[#050b14] dark:text-primary' : ''
-                                            }`}
-                                            onClick={() => selectUser(person)}
-                                        >
-                                            <div className="flex-1">
-                                                <div className="flex items-center">
-                                                    <div className="relative flex-shrink-0">
-                                                        <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${person.path}`} className="h-12 w-12 rounded-full object-cover" alt="" />
-                                                        {person.active && (
-                                                            <div className="absolute bottom-0 ltr:right-0 rtl:left-0">
-                                                                <div className="h-4 w-4 rounded-full bg-success"></div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="mx-3 ltr:text-left rtl:text-right">
-                                                        <p className="mb-1 font-semibold">{person.name}</p>
-                                                        <p className="max-w-[185px] truncate text-xs text-white-dark">{person.preview}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="whitespace-nowrap text-xs font-semibold">
-                                                <p>{person.time}</p>
-                                            </div>
-                                        </button>
-                                    </div>
-                                ))
-                            ) : (
-                                !loading && <p className="text-gray-600">No members found.</p>
-                            )}
+                            {filteredItems.length > 0
+                                ? filteredItems.map((person) => (
+                                      <div key={person.userId}>
+                                          <button
+                                              type="button"
+                                              className={`flex w-full items-center justify-between rounded-md p-2 hover:bg-gray-100 hover:text-primary dark:hover:bg-[#050b14] dark:hover:text-primary ${
+                                                  selectedUser && selectedUser.userId === person.userId ? 'bg-gray-100 text-primary dark:bg-[#050b14] dark:text-primary' : ''
+                                              }`}
+                                              onClick={() => selectUser(person)}
+                                          >
+                                              <div className="flex-1">
+                                                  <div className="flex items-center">
+                                                      <div className="relative flex-shrink-0">
+                                                          <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${person.path}`} className="h-12 w-12 rounded-full object-cover" alt="" />
+                                                          {person.active && (
+                                                              <div className="absolute bottom-0 ltr:right-0 rtl:left-0">
+                                                                  <div className="h-4 w-4 rounded-full bg-success"></div>
+                                                              </div>
+                                                          )}
+                                                      </div>
+                                                      <div className="mx-3 ltr:text-left rtl:text-right">
+                                                          <p className="mb-1 font-semibold">{person.name}</p>
+                                                          <p className="max-w-[185px] truncate text-xs text-white-dark">{person.preview}</p>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                              <div className="whitespace-nowrap text-xs font-semibold">
+                                                  <p>{person.time}</p>
+                                              </div>
+                                          </button>
+                                      </div>
+                                  ))
+                                : !loading && <p className="text-gray-600">No members found.</p>}
                         </PerfectScrollbar>
                     </div>
                 </div>
@@ -229,9 +223,7 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                                 <IconMenu />
                             </button>
                             <div className="flex flex-col items-center justify-center py-8">
-                                <div className="mb-8 h-[calc(100vh_-_320px)] min-h-[120px] w-[280px] text-white dark:text-black md:w-[430px]">
-                                    {/* SVG content omitted for brevity */}
-                                </div>
+                                <div className="mb-8 h-[calc(100vh_-_320px)] min-h-[120px] w-[280px] text-white dark:text-black md:w-[430px]">{/* SVG content omitted for brevity */}</div>
                                 <p className="mx-auto flex max-w-[190px] justify-center rounded-md bg-white-dark/20 p-2 font-semibold">
                                     <IconMessage className="ltr:mr-2 rtl:ml-2" />
                                     Click User To Chat
@@ -247,7 +239,11 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                                         <IconMenu />
                                     </button>
                                     <div className="relative flex-none">
-                                        <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${selectedUser.path}`} className="h-10 w-10 rounded-full object-cover sm:h-12 sm:w-12" alt="" />
+                                        <img
+                                            src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${selectedUser.path}`}
+                                            className="h-10 w-10 rounded-full object-cover sm:h-12 sm:w-12"
+                                            alt=""
+                                        />
                                         <div className="absolute bottom-0 ltr:right-0 rtl:left-0">
                                             <div className="h-4 w-4 rounded-full bg-success"></div>
                                         </div>
@@ -272,9 +268,17 @@ const ComponentsAppsChat = ({ loginUserId }: ChatProps) => {
                                                 <div className={`flex items-start gap-3 ${message.fromUserId === selectedUser.userId ? 'justify-start' : 'justify-end'}`}>
                                                     <div className={`flex-none ${message.fromUserId === selectedUser.userId ? '' : 'order-2'}`}>
                                                         {message.fromUserId === selectedUser.userId ? (
-                                                            <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${selectedUser.path}`} className="h-10 w-10 rounded-full object-cover" alt="" />
+                                                            <img
+                                                                src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${selectedUser.path}`}
+                                                                className="h-10 w-10 rounded-full object-cover"
+                                                                alt=""
+                                                            />
                                                         ) : (
-                                                            <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${loginUser?.path}`} className="h-10 w-10 rounded-full object-cover" alt="" />
+                                                            <img
+                                                                src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${loginUser?.path}`}
+                                                                className="h-10 w-10 rounded-full object-cover"
+                                                                alt=""
+                                                            />
                                                         )}
                                                     </div>
                                                     <div className="space-y-2">
