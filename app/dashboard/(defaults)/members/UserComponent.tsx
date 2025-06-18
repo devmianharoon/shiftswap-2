@@ -9,247 +9,230 @@ import IconTwitter from '@/components/icon/icon-twitter';
 import IconUser from '@/components/icon/icon-user';
 import IconUserPlus from '@/components/icon/icon-user-plus';
 import IconX from '@/components/icon/icon-x';
+import { fetchCompanyMembers } from '@/store/MembersSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import { Transition, Dialog, TransitionChild, DialogPanel } from '@headlessui/react';
+import Cookies from 'js-cookie';
 import React, { Fragment, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
+import { AppDispatch, IRootState } from '@/store';
 
-const UserComponent = () => {
-    const [addContactModal, setAddContactModal] = useState<any>(false);
+interface Contact {
+    uid: number;
+    name: string;
+    email: string;
+    phone: string;
+    roles: string[];
+    profile?: string;
+}
 
-    const [value, setValue] = useState<any>('list');
-    const [defaultParams] = useState({
+interface Params {
+    id: number | null;
+    name: string;
+    email: string;
+    phone: string;
+    roles: string;
+}
+
+interface Role {
+    id: string;
+    label: string;
+}
+
+const UserComponent: React.FC = () => {
+    const [addContactModal, setAddContactModal] = useState<boolean>(false);
+    const [assignRoleModal, setAssignRoleModal] = useState<boolean>(false);
+    const [value, setValue] = useState<'list' | 'grid'>('list');
+    const userData = localStorage.getItem('user_data');
+    const parsedUserData = userData ? JSON.parse(userData) : null;
+    const { members } = useSelector((state: IRootState) => state.members);
+    const dispatch = useDispatch<AppDispatch>();
+
+    useEffect(() => {
+        if (parsedUserData?.company?.id) {
+            dispatch(fetchCompanyMembers(parsedUserData.company.id));
+        }
+    }, [dispatch, parsedUserData?.company?.id]);
+
+    const [defaultParams] = useState<Params>({
         id: null,
         name: '',
         email: '',
         phone: '',
-        role: '',
-        location: '',
+        roles: '',
     });
+    const [params, setParams] = useState<Params>(JSON.parse(JSON.stringify(defaultParams)));
+    const [search, setSearch] = useState<string>('');
+    const [selectedItems, setSelectedItems] = useState<number[]>([]);
+    const [selectedRole, setSelectedRole] = useState<string>('');
+    const [roles, setRoles] = useState<Role[]>([]);
+    const [loadingRoles, setLoadingRoles] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [filteredItems, setFilteredItems] = useState<Contact[]>(members);
+    const [assigningRoles, setAssigningRoles] = useState<boolean>(false);
 
-    const [params, setParams] = useState<any>(JSON.parse(JSON.stringify(defaultParams)));
+    // Update filteredItems when members or search changes
+    useEffect(() => {
+        setFilteredItems(() => members.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())));
+    }, [search, members]);
 
-    const changeValue = (e: any) => {
+    // Fetch roles from API on component mount
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                setLoadingRoles(true);
+                const token = Cookies.get('token');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/allowed_roles`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token && { Authorization: `Bearer ${token}` }),
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data: Role[] = await response.json();
+                setRoles(data);
+                setError(null);
+            } catch (err: any) {
+                setError('Failed to fetch roles. Please try again later.');
+                showMessage('Failed to fetch roles.', 'error');
+                setRoles([]);
+            } finally {
+                setLoadingRoles(false);
+            }
+        };
+
+        fetchRoles();
+    }, []);
+
+    // Assign roles to selected members
+    const assignRoles = async () => {
+        if (!selectedRole) {
+            showMessage('Please select a role.', 'error');
+            return;
+        }
+        if (selectedItems.length === 0) {
+            showMessage('Please select at least one member.', 'error');
+            return;
+        }
+
+        try {
+            setAssigningRoles(true);
+            const token = Cookies.get('token');
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/role_assignment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+                body: JSON.stringify({
+                    user_id: selectedItems,
+                    roles: [selectedRole],
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            // Update filteredItems with new roles
+            setFilteredItems((prev) => prev.map((item) => (selectedItems.includes(item.uid) ? { ...item, roles: [selectedRole] } : item)));
+
+            showMessage('Roles assigned successfully.', 'success');
+            setSelectedItems([]);
+            setSelectedRole('');
+            setAssignRoleModal(false);
+        } catch (err: any) {
+            showMessage('Failed to assign roles. Please try again.', 'error');
+        } finally {
+            setAssigningRoles(false);
+        }
+    };
+
+    const changeValue = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { value, id } = e.target;
         setParams({ ...params, [id]: value });
     };
 
-    const [search, setSearch] = useState<any>('');
-    const [contactList] = useState<any>([
-        {
-            id: 1,
-            path: 'profile-35.png',
-            name: 'Alan Green',
-            role: 'Web Developer',
-            email: 'alan@mail.com',
-            roletype:"Marketing",
-            posts: 25,
-            followers: '5K',
-            following: 500,
-        },
-        {
-            id: 2,
-            path: 'profile-35.png',
-            name: 'Linda Nelson',
-            role: 'Web Designer',
-            email: 'linda@mail.com',
-            roletype:"Developer",
-            posts: 25,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 3,
-            path: 'profile-35.png',
-            name: 'Lila Perry',
-            role: 'UX/UI Designer',
-            email: 'lila@mail.com',
-            roletype:"Marketing",
-            posts: 20,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 4,
-            path: 'profile-35.png',
-            name: 'Andy King',
-            role: 'Project Lead',
-            email: 'andy@mail.com',
-            roletype:"Marketing",
-            posts: 25,
-            followers: '21.5K',
-            following: 300,
-        },
-        {
-            id: 5,
-            path: 'profile-35.png',
-            name: 'Jesse Cory',
-            role: 'Web Developer',
-            email: 'jesse@mail.com',
-           roletype:"Marketing",
-            posts: 30,
-            followers: '20K',
-            following: 350,
-        },
-        {
-            id: 6,
-            path: 'profile-35.png',
-            name: 'Xavier',
-            role: 'UX/UI Designer',
-            email: 'xavier@mail.com',
-            roletype:"Marketing",
-            posts: 25,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 7,
-            path: 'profile-35.png',
-            name: 'Susan',
-            role: 'Project Manager',
-            email: 'susan@mail.com',
-            roletype:"Marketing",
-            posts: 40,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 8,
-            path: 'profile-35.png',
-            name: 'Raci Lopez',
-            role: 'Web Developer',
-            email: 'traci@mail.com',
-            roletype:"Marketing",
-            posts: 25,
-            followers: '21.5K',
-            following: 350,
-        },
-        {
-            id: 9,
-            path: 'profile-35.png',
-            name: 'Steven Mendoza',
-            role: 'HR',
-            email: 'sokol@verizon.net',
-            roletype:"Marketing",
-            posts: 40,
-            followers: '21.8K',
-            following: 300,
-        },
-        {
-            id: 10,
-            path: 'profile-35.png',
-            name: 'James Cantrell',
-            role: 'Web Developer',
-            email: 'sravani@comcast.net',
-            roletype:"Marketing",
-            posts: 100,
-            followers: '28K',
-            following: 520,
-        },
-        {
-            id: 11,
-            path: 'profile-35.png',
-            name: 'Reginald Brown',
-            role: 'Web Designer',
-            email: 'drhyde@gmail.com',
-            roletype:"Marketing",
-            posts: 35,
-            followers: '25K',
-            following: 500,
-        },
-        {
-            id: 12,
-            path: 'profile-35.png',
-            name: 'Stacey Smith',
-            role: 'Chief technology officer',
-            email: 'maikelnai@optonline.net',
-            roletype:"Marketing",
-            posts: 21,
-            followers: '5K',
-            following: 200,
-        },
-    ]);
-
-    const [filteredItems, setFilteredItems] = useState<any>(contactList);
-
-    const searchContact = () => {
-        setFilteredItems(() => {
-            return contactList.filter((item: any) => {
-                return item.name.toLowerCase().includes(search.toLowerCase());
-            });
-        });
-    };
-
-    useEffect(() => {
-        searchContact();
-    }, [search]);
-
     const saveUser = () => {
         if (!params.name) {
             showMessage('Name is required.', 'error');
-            return true;
+            return;
         }
         if (!params.email) {
             showMessage('Email is required.', 'error');
-            return true;
+            return;
         }
         if (!params.phone) {
             showMessage('Phone is required.', 'error');
-            return true;
+            return;
         }
-        if (!params.role) {
-            showMessage('Occupation is required.', 'error');
-            return true;
+        if (!params.roles) {
+            showMessage('Role is required.', 'error');
+            return;
         }
 
         if (params.id) {
-            //update user
-            let user: any = filteredItems.find((d: any) => d.id === params.id);
-            user.name = params.name;
-            user.email = params.email;
-            user.phone = params.phone;
-            user.role = params.role;
-            user.location = params.location;
+            // Update user
+            setFilteredItems((prev) =>
+                prev.map((user) =>
+                    user.uid === params.id
+                        ? {
+                              ...user,
+                              name: params.name,
+                              email: params.email,
+                              phone: params.phone,
+                              roles: [params.roles],
+                          }
+                        : user,
+                ),
+            );
         } else {
-            //add user
-            let maxUserId = filteredItems.length ? filteredItems.reduce((max: any, character: any) => (character.id > max ? character.id : max), filteredItems[0].id) : 0;
-
-            let user = {
-                id: maxUserId + 1,
-                path: 'profile-35.png',
+            // Add user
+            const maxUserId = filteredItems.length ? Math.max(...filteredItems.map((item) => item.uid)) : 0;
+            const newUser: Contact = {
+                uid: maxUserId + 1,
                 name: params.name,
                 email: params.email,
                 phone: params.phone,
-                role: params.role,
-                location: params.location,
-                posts: 20,
-                followers: '5K',
-                following: 500,
+                roles: [params.roles],
             };
-            filteredItems.splice(0, 0, user);
-            //   searchContacts();
+            setFilteredItems([newUser, ...filteredItems]);
         }
 
         showMessage('User has been saved successfully.');
         setAddContactModal(false);
     };
 
-    const editUser = (user: any = null) => {
-        const json = JSON.parse(JSON.stringify(defaultParams));
+    const editUser = (user: Contact | null = null) => {
+        const json = JSON.parse(JSON.stringify(defaultParams)) as Params;
         setParams(json);
         if (user) {
-            let json1 = JSON.parse(JSON.stringify(user));
-            setParams(json1);
+            setParams({
+                id: user.uid,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                roles: user.roles[0] || '',
+            });
         }
         setAddContactModal(true);
     };
 
-    const deleteUser = (user: any = null) => {
-        setFilteredItems(filteredItems.filter((d: any) => d.id !== user.id));
+    const deleteUser = (user: Contact) => {
+        setFilteredItems(filteredItems.filter((d) => d.uid !== user.uid));
+        setSelectedItems(selectedItems.filter((id) => id !== user.uid));
         showMessage('User has been deleted successfully.');
     };
 
-    const showMessage = (msg = '', type = 'success') => {
-        const toast: any = Swal.mixin({
+    const handleCheckboxChange = (id: number) => {
+        setSelectedItems((prev) => (prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]));
+    };
+
+    const showMessage = (msg: string = '', type: 'success' | 'error' = 'success') => {
+        const toast = Swal.mixin({
             toast: true,
             position: 'top',
             showConfirmButton: false,
@@ -269,6 +252,13 @@ const UserComponent = () => {
                 <h2 className="text-xl">Contacts</h2>
                 <div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
                     <div className="flex gap-3">
+                        {selectedItems.length > 0 && (
+                            <div>
+                                <button type="button" className="btn btn-primary" onClick={() => setAssignRoleModal(true)}>
+                                    Assign Role
+                                </button>
+                            </div>
+                        )}
                         <div>
                             <button type="button" className="btn btn-primary" onClick={() => editUser()}>
                                 <IconUserPlus className="ltr:mr-2 rtl:ml-2" />
@@ -287,7 +277,13 @@ const UserComponent = () => {
                         </div>
                     </div>
                     <div className="relative">
-                        <input type="text" placeholder="Search Contacts" className="peer form-input py-2 ltr:pr-11 rtl:pl-11" value={search} onChange={(e) => setSearch(e.target.value)} />
+                        <input
+                            type="text"
+                            placeholder="Search Contacts"
+                            className="peer form-input py-2 ltr:pr-11 rtl:pl-11"
+                            value={search}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+                        />
                         <button type="button" className="absolute top-1/2 -translate-y-1/2 peer-focus:text-primary ltr:right-[11px] rtl:left-[11px]">
                             <IconSearch className="mx-auto" />
                         </button>
@@ -302,49 +298,47 @@ const UserComponent = () => {
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
-                                   
                                     <th>Role Type</th>
                                     <th className="!text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredItems.map((contact: any) => {
-                                    return (
-                                        <tr key={contact.id}>
-                                            <td>
-                                                <div className="flex w-max items-center">
-                                                    {contact.path && (
-                                                        <div className="w-max">
-                                                            <img src={`/assets/images/${contact.path}`} className="h-8 w-8 rounded-full object-cover ltr:mr-2 rtl:ml-2" alt="avatar" />
-                                                        </div>
-                                                    )}
-                                                    {!contact.path && contact.name && (
-                                                        <div className="grid h-8 w-8 place-content-center rounded-full bg-primary text-sm font-semibold text-white ltr:mr-2 rtl:ml-2"></div>
-                                                    )}
-                                                    {!contact.path && !contact.name && (
-                                                        <div className="rounded-full border border-gray-300 p-2 ltr:mr-2 rtl:ml-2 dark:border-gray-800">
-                                                            <IconUser className="h-4.5 w-4.5" />
-                                                        </div>
-                                                    )}
-                                                    <div>{contact.name}</div>
-                                                </div>
-                                            </td>
-                                            <td>{contact.email}</td>
-                                            
-                                            <td className="whitespace-nowrap">{contact.role}</td>
-                                            <td>
-                                                <div className="flex items-center justify-center gap-4">
-                                                    <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => editUser(contact)}>
-                                                        Edit
-                                                    </button>
-                                                    <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => deleteUser(contact)}>
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                {filteredItems.map((member) => (
+                                    <tr key={member.uid}>
+                                        <td>
+                                            <div className="flex w-max items-center">
+                                                {member.name && (
+                                                    <div className="w-max">
+                                                        <img
+                                                            src={`https://drupal-shift-swap.asdev.tech/sites/default/files${member.profile}`}
+                                                            className="h-8 w-8 rounded-full object-cover ltr:mr-2 rtl:ml-2"
+                                                            alt="avatar"
+                                                        />
+                                                    </div>
+                                                )}
+                                                {!member.name && (
+                                                    <div className="rounded-full border border-gray-300 p-2 ltr:mr-2 rtl:ml-2 dark:border-gray-800">
+                                                        <IconUser className="h-4.5 w-4.5" />
+                                                    </div>
+                                                )}
+                                                <div>{member.name}</div>
+                                            </div>
+                                        </td>
+                                        <td>{member.email}</td>
+                                        <td className="whitespace-nowrap">{member.roles.join(', ')}</td>
+                                        <td>
+                                            <div className="flex items-center justify-center gap-4">
+                                                <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => editUser(member)}>
+                                                    Edit
+                                                </button>
+                                                <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => deleteUser(member)}>
+                                                    Delete
+                                                </button>
+                                                <input type="checkbox" checked={selectedItems.includes(member.uid)} onChange={() => handleCheckboxChange(member.uid)} className="form-checkbox" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -353,86 +347,68 @@ const UserComponent = () => {
 
             {value === 'grid' && (
                 <div className="mt-5 grid w-full grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                    {filteredItems.map((contact: any) => {
-                        return (
-                            <div className="relative overflow-hidden rounded-md bg-white text-center shadow dark:bg-[#1c232f]" key={contact.id}>
-                                <div className="relative overflow-hidden rounded-md bg-white text-center shadow dark:bg-[#1c232f]">
-                                    <div className="rounded-t-md bg-white/40 bg-[url('/assets/images/notification-bg.png')] bg-cover bg-center p-6 pb-0">
-                                        <img className="mx-auto max-h-40 w-4/5 object-contain" src={`/assets/images/${contact.path}`} alt="contact_image" />
+                    {filteredItems.map((member) => (
+                        <div className="relative overflow-hidden rounded-md bg-white text-center shadow dark:bg-[#1c232f]" key={member.uid}>
+                            <div className="rounded-t-md bg-white/40 bg-[url('/assets/images/notification-bg.png')] bg-cover bg-center p-6 pb-0">
+                                <div className="mx-auto h-40 w-40 rounded-full bg-primary text-4xl font-semibold text-white flex items-center justify-center">
+                                    {member.name.charAt(0).toUpperCase()}
+                                </div>
+                            </div>
+                            <div className="relative -mt-10 px-6 pb-24">
+                                <div className="rounded-md bg-white px-2 py-4 shadow-md dark:bg-gray-900">
+                                    <div className="text-xl">{member.name}</div>
+                                    <div className="text-white-dark">{member.roles.join(', ')}</div>
+                                    <div className="mt-4">
+                                        <ul className="flex items-center justify-center space-x-4 rtl:space-x-reverse">
+                                            <li>
+                                                <button type="button" className="btn btn-outline-primary h-7 w-7 rounded-full p-0">
+                                                    <IconFacebook />
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button type="button" className="btn btn-outline-primary h-7 w-7 rounded-full p-0">
+                                                    <IconInstagram />
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button type="button" className="btn btn-outline-primary h-7 w-7 rounded-full p-0">
+                                                    <IconLinkedin />
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button type="button" className="btn btn-outline-primary h-7 w-7 rounded-full p-0">
+                                                    <IconTwitter />
+                                                </button>
+                                            </li>
+                                        </ul>
                                     </div>
-                                    <div className="relative -mt-10 px-6 pb-24">
-                                        <div className="rounded-md bg-white px-2 py-4 shadow-md dark:bg-gray-900">
-                                            <div className="text-xl">{contact.name}</div>
-                                            <div className="text-white-dark">{contact.role}</div>
-                                            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-                                                <div className="flex-auto">
-                                                    <div className="text-info">{contact.posts}</div>
-                                                    <div>Posts</div>
-                                                </div>
-                                                <div className="flex-auto">
-                                                    <div className="text-info">{contact.following}</div>
-                                                    <div>Following</div>
-                                                </div>
-                                                <div className="flex-auto">
-                                                    <div className="text-info">{contact.followers}</div>
-                                                    <div>Followers</div>
-                                                </div>
-                                            </div>
-                                            <div className="mt-4">
-                                                <ul className="flex items-center justify-center space-x-4 rtl:space-x-reverse">
-                                                    <li>
-                                                        <button type="button" className="btn btn-outline-primary h-7 w-7 rounded-full p-0">
-                                                            <IconFacebook />
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button type="button" className="btn btn-outline-primary h-7 w-7 rounded-full p-0">
-                                                            <IconInstagram />
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button type="button" className="btn btn-outline-primary h-7 w-7 rounded-full p-0">
-                                                            <IconLinkedin />
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button type="button" className="btn btn-outline-primary h-7 w-7 rounded-full p-0">
-                                                            <IconTwitter />
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <div className="mt-6 grid grid-cols-1 gap-4 ltr:text-left rtl:text-right">
-                                            <div className="flex items-center">
-                                                <div className="flex-none ltr:mr-2 rtl:ml-2">Email :</div>
-                                                <div className="truncate text-white-dark">{contact.email}</div>
-                                            </div>
-                                            <div className="flex items-center">
-                                                <div className="flex-none ltr:mr-2 rtl:ml-2">Phone :</div>
-                                                <div className="text-white-dark">{contact.phone}</div>
-                                            </div>
-                                            <div className="flex items-center">
-                                                <div className="flex-none ltr:mr-2 rtl:ml-2">Address :</div>
-                                                <div className="text-white-dark">{contact.location}</div>
-                                            </div>
-                                        </div>
+                                </div>
+                                <div className="mt-6 grid grid-cols-1 gap-4 ltr:text-left rtl:text-right">
+                                    <div className="flex items-center">
+                                        <div className="flex-none ltr:mr-2 rtl:ml-2">Email :</div>
+                                        <div className="truncate text-white-dark">{member.email}</div>
                                     </div>
-                                    <div className="absolute bottom-0 mt-6 flex w-full gap-4 p-6 ltr:left-0 rtl:right-0">
-                                        <button type="button" className="btn btn-outline-primary w-1/2" onClick={() => editUser(contact)}>
-                                            Edit
-                                        </button>
-                                        <button type="button" className="btn btn-outline-danger w-1/2" onClick={() => deleteUser(contact)}>
-                                            Delete
-                                        </button>
+                                    <div className="flex items-center">
+                                        <div className="flex-none ltr:mr-2 rtl:ml-2">Phone :</div>
+                                        <div className="text-white-dark">{member.phone}</div>
                                     </div>
                                 </div>
                             </div>
-                        );
-                    })}
+                            <div className="absolute bottom-0 mt-6 flex w-full gap-4 p-6 ltr:left-0 rtl:right-0">
+                                <button type="button" className="btn btn-outline-primary w-1/2" onClick={() => editUser(member)}>
+                                    Edit
+                                </button>
+                                <button type="button" className="btn btn-outline-danger w-1/2" onClick={() => deleteUser(member)}>
+                                    Delete
+                                </button>
+                                <input type="checkbox" checked={selectedItems.includes(member.uid)} onChange={() => handleCheckboxChange(member.uid)} className="form-checkbox" />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
+            {/* Add Contact Modal */}
             <Transition appear show={addContactModal} as={Fragment}>
                 <Dialog as="div" open={addContactModal} onClose={() => setAddContactModal(false)} className="relative z-50">
                     <TransitionChild as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
@@ -464,30 +440,19 @@ const UserComponent = () => {
                                         <form>
                                             <div className="mb-5">
                                                 <label htmlFor="name">Name</label>
-                                                <input id="name" type="text" placeholder="Enter Name" className="form-input" value={params.name} onChange={(e) => changeValue(e)} />
+                                                <input id="name" type="text" placeholder="Enter Name" className="form-input" value={params.name} onChange={changeValue} />
                                             </div>
                                             <div className="mb-5">
                                                 <label htmlFor="email">Email</label>
-                                                <input id="email" type="email" placeholder="Enter Email" className="form-input" value={params.email} onChange={(e) => changeValue(e)} />
+                                                <input id="email" type="email" placeholder="Enter Email" className="form-input" value={params.email} onChange={changeValue} />
                                             </div>
                                             <div className="mb-5">
                                                 <label htmlFor="number">Phone Number</label>
-                                                <input id="phone" type="text" placeholder="Enter Phone Number" className="form-input" value={params.phone} onChange={(e) => changeValue(e)} />
+                                                <input id="phone" type="text" placeholder="Enter Phone Number" className="form-input" value={params.phone} onChange={changeValue} />
                                             </div>
                                             <div className="mb-5">
-                                                <label htmlFor="occupation">Occupation</label>
-                                                <input id="role" type="text" placeholder="Enter Occupation" className="form-input" value={params.role} onChange={(e) => changeValue(e)} />
-                                            </div>
-                                            <div className="mb-5">
-                                                <label htmlFor="address">Address</label>
-                                                <textarea
-                                                    id="location"
-                                                    rows={3}
-                                                    placeholder="Enter Address"
-                                                    className="form-textarea min-h-[130px] resize-none"
-                                                    value={params.location}
-                                                    onChange={(e) => changeValue(e)}
-                                                ></textarea>
+                                                <label htmlFor="roles">Role</label>
+                                                <input id="roles" type="text" placeholder="Enter Role" className="form-input" value={params.roles} onChange={changeValue} />
                                             </div>
                                             <div className="mt-8 flex items-center justify-end">
                                                 <button type="button" className="btn btn-outline-danger" onClick={() => setAddContactModal(false)}>
@@ -495,6 +460,77 @@ const UserComponent = () => {
                                                 </button>
                                                 <button type="button" className="btn btn-primary ltr:ml-4 rtl:mr-4" onClick={saveUser}>
                                                     {params.id ? 'Update' : 'Add'}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </DialogPanel>
+                            </TransitionChild>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+            {/* Assign Role Modal */}
+            <Transition appear show={assignRoleModal} as={Fragment}>
+                <Dialog as="div" open={assignRoleModal} onClose={() => setAssignRoleModal(false)} className="relative z-50">
+                    <TransitionChild as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+                        <div className="fixed inset-0 bg-[black]/60" />
+                    </TransitionChild>
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center px-4 py-8">
+                            <TransitionChild
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <DialogPanel className="panel w-full max-w-md overflow-hidden rounded-lg border-0 p-0 text-black dark:text-white-dark">
+                                    <button
+                                        type="button"
+                                        onClick={() => setAssignRoleModal(false)}
+                                        className="absolute top-4 text-gray-400 outline-none hover:text-gray-800 ltr:right-4 rtl:left-4 dark:hover:text-gray-600"
+                                    >
+                                        <IconX />
+                                    </button>
+                                    <div className="bg-[#fbfbfb] py-3 text-lg font-medium ltr:pl-5 ltr:pr-[50px] rtl:pl-[50px] rtl:pr-5 dark:bg-[#121c2c]">Assign Role</div>
+                                    <div className="p-5">
+                                        <form>
+                                            <div className="mb-5">
+                                                <label className="block mb-2">Select Role</label>
+                                                {loadingRoles ? (
+                                                    <p>Loading roles...</p>
+                                                ) : error ? (
+                                                    <p className="text-red-500">{error}</p>
+                                                ) : roles.length === 0 ? (
+                                                    <p>No roles available.</p>
+                                                ) : (
+                                                    <div className="flex flex-col gap-4">
+                                                        {roles.map((role) => (
+                                                            <label key={role.id} className="flex items-center">
+                                                                <input
+                                                                    type="radio"
+                                                                    name="role"
+                                                                    value={role.id}
+                                                                    checked={selectedRole === role.id}
+                                                                    onChange={(e) => setSelectedRole(e.target.value)}
+                                                                    className="form-radio"
+                                                                />
+                                                                <span className="ltr:ml-2 rtl:mr-2">{role.label}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="mt-8 flex items-center justify-end">
+                                                <button type="button" className="btn btn-outline-danger" onClick={() => setAssignRoleModal(false)}>
+                                                    Cancel
+                                                </button>
+                                                <button type="button" className="btn btn-primary ltr:ml-4 rtl:mr-4" onClick={assignRoles} disabled={assigningRoles}>
+                                                    {assigningRoles ? 'Assigning...' : 'Confirm'}
                                                 </button>
                                             </div>
                                         </form>
