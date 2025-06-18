@@ -16,7 +16,10 @@ import ComponentsUsersProfilePaymentHistory from '@/components/users/profile/com
 import { Metadata } from 'next';
 import Link from 'next/link';
 import React from 'react';
-
+import { Copy } from 'lucide-react';
+import { useState } from 'react';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 // export const metadata: Metadata = {
 //     title: 'Profile',
 // };
@@ -25,6 +28,16 @@ const Profile = () => {
     const userData = localStorage.getItem('user_data');
     const parsedUserData = userData ? JSON.parse(userData) : null;
     console.log(parsedUserData);
+    const handleCopy = (text: string) => {
+        navigator.clipboard
+            .writeText(text)
+            .then(() => {
+                alert('Copied to clipboard!'); // or use toast
+            })
+            .catch((err) => {
+                console.error('Failed to copy: ', err);
+            });
+    };
     return (
         <div>
             <ul className="flex space-x-2 rtl:space-x-reverse">
@@ -49,7 +62,7 @@ const Profile = () => {
                         <div className="mb-5">
                             <div className="flex flex-col justify-center items-center">
                                 <img src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${parsedUserData.logo}`} alt="img" className="mb-5 h-24 w-24 rounded-full  object-cover" />
-                                <p className="text-xl font-semibold text-primary uppercase">{parsedUserData.name}</p>
+                                <p className="text-xl font-semibold text-primary uppercase">{parsedUserData.field_full_name}</p>
                             </div>
                             <div className="flex">
                                 <ul className="m-auto mt-5 flex  flex-col space-y-4 font-semibold text-white-dark">
@@ -85,11 +98,11 @@ const Profile = () => {
                                             {parsedUserData.phone}
                                         </span>
                                     </li>
-
                                     {parsedUserData.secret_key && (
-                                        <li className="flex items-center gap-2 ">
+                                        <li className="flex items-center gap-2">
                                             <IconMapPin className="shrink-0" />
-                                            Secret Key: {parsedUserData.secret_key}
+                                            <span>Secret Key: {parsedUserData.secret_key}</span>
+                                            {parsedUserData.secret_key && <Copy className="ml-2 cursor-pointer hover:text-primary" size={16} onClick={() => handleCopy(parsedUserData.secret_key)} />}
                                         </li>
                                     )}
                                 </ul>
