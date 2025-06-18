@@ -87,9 +87,7 @@ const Sidebar = () => {
         selector?.classList.add('active');
     };
 
-    const userData = localStorage.getItem('user_data');
-    const parsedUserData = userData ? JSON.parse(userData) : null;
-    console.log(parsedUserData.logo);
+
 
     return (
         <div className={semidark ? 'light' : ''}>
@@ -121,10 +119,14 @@ const Sidebar = () => {
                                     </div>
                                 </Link>
                             </li>
-                            {/* {parsedUserData.account_type === 'member' && (
-                                
-                            )} */}
-
+                            <li className="nav-item">
+                                <Link href="/dashboard/swap-requests" className="group">
+                                    <div className="flex items-center">
+                                        <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Swap Requests')}</span>
+                                    </div>
+                                </Link>
+                            </li>
                             <li className="nav-item">
                                 <ul>
                                     {/* <li className="nav-item">
@@ -135,95 +137,30 @@ const Sidebar = () => {
                                             </div>
                                         </Link>
                                     </li> */}
-                                    {parsedUserData.roles?.some((role: string) => ['authenticated'].includes(role)) && (
-                                        <>
-                                            <li className="nav-item">
-                                                <Link href="/dashboard/swap-requests" className="group">
-                                                    <div className="flex items-center">
-                                                        <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
-                                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Swap Requests')}</span>
-                                                    </div>
-                                                </Link>
-                                            </li>
-                                            <li className="nav-item">
-                                                <Link href="/dashboard/my-swap-requests" className="group">
-                                                    <div className="flex items-center">
-                                                        <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
-                                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('My Swap Requests')}</span>
-                                                    </div>
-                                                </Link>
-                                            </li>
-                                            <li className="nav-item">
-                                                <Link href="/dashboard/apps/chat" className="group">
-                                                    <div className="flex items-center">
-                                                        <CalendarClock className="shrink-0 group-hover:!text-primary" />
-                                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Chats')}</span>
-                                                    </div>
-                                                </Link>
-                                            </li>
-                                        </>
-                                    )}
-                                    {parsedUserData.roles?.some((role: string) => ['business_admin'].includes(role)) && (
-                                        <>
-                                            <li className="nav-item">
-                                                <Link href="/dashboard/manage-swap-requests" className="group">
-                                                    <div className="flex items-center">
-                                                        <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
-                                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Manage Swap Requests')}</span>
-                                                    </div>
-                                                </Link>
-                                            </li>
-                                            <li className="nav-item">
-                                                <Link href="/dashboard/apps/calendar" className="group">
-                                                    <div className="flex items-center">
-                                                        <CalendarClock className="shrink-0 group-hover:!text-primary" />
-                                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Shifts')}</span>
-                                                    </div>
-                                                </Link>
-                                            </li>
-                                            <li className="nav-item">
-                                                <Link href="/dashboard/groups" className="group">
-                                                    <div className="flex items-center">
-                                                        <Layers3 className="shrink-0 group-hover:!text-primary" />
-                                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Groups')}</span>
-                                                    </div>
-                                                </Link>
-                                                {/* <li className="nav-item">
-                                    <Link href="/dashboard/apps/contacts" className="group">
-                                        <div className="flex items-center">
-                                            <FileBarChart className="shrink-0 group-hover:!text-primary" />
-                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Reports')}</span>
-                                        </div>
-                                    </Link>
-                                </li> */}
-                                                {/* <li className="nav-item">
-                                    <Link href="/dashboard/apps/contacts" className="group">
-                                        <div className="flex items-center">
-                                            <Settings className="shrink-0 group-hover:!text-primary" />
-                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Settings')}</span>
-                                        </div>
-                                    </Link>
-                                </li> */}
-
-                                                <li className="nav-item">
-                                                    <Link href="/dashboard/members" className="group">
-                                                        <div className="flex items-center">
-                                                            <UserRound className="shrink-0 group-hover:!text-primary" />
-                                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Members')}</span>
-                                                        </div>
-                                                    </Link>
-                                                </li>
-                                            </li>
-                                            <li className="nav-item">
-                                                <Link href="/dashboard/apps/chat" className="group">
-                                                    <div className="flex items-center">
-                                                        <CalendarClock className="shrink-0 group-hover:!text-primary" />
-                                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Chats')}</span>
-                                                    </div>
-                                                </Link>
-                                            </li>
-                                        </>
-                                    )}
+                                    <li className="nav-item">
+                                        <Link href="/dashboard/my-swap-requests" className="group">
+                                            <div className="flex items-center">
+                                                <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
+                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('My Swap Requests')}</span>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link href="/dashboard/manage-swap-requests" className="group">
+                                            <div className="flex items-center">
+                                                <ArrowLeftRight className="shrink-0 group-hover:!text-primary" />
+                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Manage Swap Requests')}</span>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link href="/dashboard/apps/calendar" className="group">
+                                            <div className="flex items-center">
+                                                <CalendarClock className="shrink-0 group-hover:!text-primary" />
+                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Shifts')}</span>
+                                            </div>
+                                        </Link>
+                                    </li>
                                 </ul>
                             </li>
 
@@ -247,6 +184,39 @@ const Sidebar = () => {
                                     </div>
                                 </Link>
                             </li> */}
+                            <li className="nav-item">
+                                <Link href="/dashboard/groups" className="group">
+                                    <div className="flex items-center">
+                                        <Layers3 className="shrink-0 group-hover:!text-primary" />
+                                        <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Groups')}</span>
+                                    </div>
+                                </Link>
+                                {/* <li className="nav-item">
+                                    <Link href="/dashboard/apps/contacts" className="group">
+                                        <div className="flex items-center">
+                                            <FileBarChart className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Reports')}</span>
+                                        </div>
+                                    </Link>
+                                </li> */}
+                                {/* <li className="nav-item">
+                                    <Link href="/dashboard/apps/contacts" className="group">
+                                        <div className="flex items-center">
+                                            <Settings className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Settings')}</span>
+                                        </div>
+                                    </Link>
+                                </li> */}
+
+                                <li className="nav-item">
+                                    <Link href="/dashboard/members" className="group">
+                                        <div className="flex items-center">
+                                            <UserRound className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Members')}</span>
+                                        </div>
+                                    </Link>
+                                </li>
+                            </li>
                         </ul>
                     </PerfectScrollbar>
                 </div>
