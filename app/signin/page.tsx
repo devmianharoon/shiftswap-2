@@ -8,7 +8,6 @@ import Cookies from 'js-cookie';
 import { AppDispatch, IRootState } from '@/store';
 import { loginUser } from '@/store/AuthSlice';
 import { fetchUser } from '@/store/UserSlice';
-import { jwtDecode } from 'jwt-decode';
 import { decodeJWT, isTokenExpired } from '@/data/lib/token';
 
 export default function Page() {

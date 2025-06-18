@@ -33,6 +33,7 @@ import IconMenuPages from '@/components/icon/menu/icon-menu-pages';
 import IconMenuMore from '@/components/icon/menu/icon-menu-more';
 import { usePathname, useRouter } from 'next/navigation';
 import { getTranslation } from '@/i18n';
+import Cookies from 'js-cookie';
 
 const Header = () => {
     const userData = localStorage.getItem('user_data');
@@ -42,6 +43,14 @@ const Header = () => {
     const dispatch = useDispatch();
     const router = useRouter();
     const { t, i18n } = getTranslation();
+    const handleSignOut = () => {
+        // Remove your auth cookie(s)
+        Cookies.remove('current_user_tt'); // Replace with your actual cookie name
+        // Clear localStorage
+        localStorage.clear();
+        // Redirect to sign-in or home page
+        router.push('/signin');
+    };
 
     useEffect(() => {
         const selector = document.querySelector('ul.horizontal-menu a[href="' + window.location.pathname + '"]');
@@ -450,10 +459,10 @@ const Header = () => {
                                     </li>
 
                                     <li className="border-t border-white-light dark:border-white-light/10">
-                                        <Link href="/" className="!py-3 text-danger">
+                                        <button onClick={handleSignOut} className="flex w-full items-center !py-3 text-danger" type="button">
                                             <IconLogout className="h-4.5 w-4.5 shrink-0 rotate-90 ltr:mr-2 rtl:ml-2" />
                                             Sign Out
-                                        </Link>
+                                        </button>
                                     </li>
                                 </ul>
                             </Dropdown>
