@@ -4,6 +4,8 @@ import authReducer from '@/store/AuthSlice';
 import userReducer from '@/store/RegisterSlice';
 import currentUserSlice from '@/store/UserSlice';
 import companyMembersReducer from '@/store/MembersSlice';
+import activityReducer from '@/store/activitySlice';
+
 
 const rootReducer = combineReducers({
     themeConfig: themeConfigSlice,
@@ -11,6 +13,8 @@ const rootReducer = combineReducers({
     register: userReducer,
     currentUser: currentUserSlice,
     members: companyMembersReducer,
+    activity : activityReducer
+
 });
 
 export const store = configureStore({

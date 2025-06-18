@@ -1,5 +1,7 @@
 import { co } from '@fullcalendar/core/internal-common';
 import { useEffect, useState, useRef } from 'react';
+import { markUserActive } from '@/store/activitySlice';
+import { useDispatch } from 'react-redux';
 
 interface BackendMessage {
     sender: string;
@@ -20,6 +22,7 @@ export const useChat = (userId: string, selectedRecipientId: string | null) => {
     const [decryptedMessages, setDecryptedMessages] = useState<{ [key: string]: string }>({});
     const socketRef = useRef<WebSocket | null>(null);
     const [cryptoKey, setCryptoKey] = useState<CryptoKey | null>(null);
+    const dispatch = useDispatch();
 
     // Derive AES-GCM key from shared secret
     useEffect(() => {
@@ -56,6 +59,10 @@ export const useChat = (userId: string, selectedRecipientId: string | null) => {
         socket.onmessage = async (event) => {
             const data = JSON.parse(event.data);
             console.log('Received:', data);
+            // Dispatch activity (use `data.senderId` or whatever the sender's ID is)
+            if (data.senderId) {
+                dispatch(markUserActive({ userId: data.senderId, timestamp: Date.now() }));
+            }
             if (data.action === 'messages') {
                 setMessages(data.data);
             } else {

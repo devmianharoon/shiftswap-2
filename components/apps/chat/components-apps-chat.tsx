@@ -41,6 +41,7 @@ const ComponentsAppsChat = () => {
     // const userId = typeof loginUserId === 'string' ? loginUserId : loginUserId[0];
     const [selectedUser, setSelectedUser] = useState<Contact | null>(null);
     const { messages, sendMessage } = useChat(userId, selectedUser?.userId || null);
+    // console.log('Messages:alll in compo', messages);
     const dispatch = useDispatch<AppDispatch>();
     const { members, loading, error } = useSelector((state: IRootState) => state.members); // Corrected state slice
     const [isShowChatMenu, setIsShowChatMenu] = useState(false);

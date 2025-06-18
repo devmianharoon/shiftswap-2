@@ -1,4 +1,5 @@
 // utils/decodeToken.ts
+import Cookies from 'js-cookie';
 import  { jwtDecode } from 'jwt-decode';
 
 // export interface JWTPayload {
@@ -28,10 +29,33 @@ export function decodeJWT(token: string): JWTPayload | null {
         return null;
     }
 }
-export function isTokenExpired(token: string): boolean {
-    const decoded = decodeJWT(token);
-    if (!decoded) return true;
+// export function isTokenExpired(token: string) {
+//     const decoded = decodeJWT(token);
+//     if (!decoded) return true;
+//     const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
 
+//     return decoded.exp < currentTime;
+
+
+// }
+export function isTokenExpired(token: string) {
+    const decoded = decodeJWT(token);
+    if (!decoded) {
+        // Remove cookies and localStorage if token is invalid
+        Cookies.remove('current_user_tt'); // Replace 'token' with your actual cookie name
+        localStorage.clear();
+        window.location.href = '/signin'; // Redirect to signup page
+        return true;
+    }
     const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-    return decoded.exp < currentTime;
+
+    if (decoded.exp < currentTime) {
+        // Remove cookies and localStorage if token is expired
+        Cookies.remove('current_user_tt'); // Replace 'token' with your actual cookie name
+        localStorage.clear();
+        window.location.href = '/signin'; // Redirect to signup page
+        return true;
+    }
+
+    return false;
 }
