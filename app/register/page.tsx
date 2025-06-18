@@ -307,9 +307,10 @@ const RegisterPage = () => {
             try {
                 const apiPayload = {
                     mail: [{ value: formData.email }],
+                    field_full_name :[{ value: formData.name }],
                     pass: [{ value: formData.password }],
                     field_phone: [{ value: formData.phone }],
-                    name: [{ value: formData.name }],
+                    name: [{ value: formData.email }],
                     field_account_type: [{ value: 'business' as 'business' }],
                     field_business_name: [{ value: formData.businessName }],
                     // field_business_type: [{ target_id: formData.businessType }],
@@ -338,9 +339,10 @@ const RegisterPage = () => {
 
             try {
                 const apiPayload = {
-                    name: [{ value: formData.name }],
+                    name: [{ value: formData.email }],
                     mail: [{ value: formData.email }],
                     pass: [{ value: formData.password }],
+                    field_full_name :[{ value: formData.name }],
                     field_account_type: [{ value: 'member' as 'member' }],
                     field_phone: [{ value: formData.phone }],
                     // field_secret_code: [{ value: formData.secretCode }],

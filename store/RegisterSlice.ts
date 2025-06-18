@@ -22,45 +22,38 @@ interface RegisterResponse {
 //     user_picture?: { target_id: string | number }[];
 // }
 interface RegisterData {
-  name?: { value: string }[];                         // Username
-  mail?: { value: string }[];                         // Email
-  pass?: { value: string }[];                         // Password
-
-  field_account_type?: { value: 'member' | 'business' }[]; // List (text)
-
-  field_business_name?: { value: string }[];          // Business Name
-  field_business_secret_key?: { value: string }[];    // Business Secret Key
-
-  field_business_type?: { target_id: string | number }[]; // Taxonomy term
-  field_company?: { target_id: string | number }[];        // User reference
-
-  field_logo?: { target_id: string | number }[];       // Image (file entity ID)
-  user_picture?: { target_id: string | number }[];     // Image (file entity ID)
-
-  field_phone?: { value: string }[];                   // Phone number
-  field_skills?: { target_id: string | number }[];     // Taxonomy term
+    name?: { value: string }[]; // Username
+    mail?: { value: string }[]; // Email
+    pass?: { value: string }[]; // Password
+    field_full_name?: { value: string }[]; // Full Name,
+    field_account_type?: { value: 'member' | 'business' }[]; // List (text)
+    field_business_name?: { value: string }[]; // Business Name
+    field_business_secret_key?: { value: string }[]; // Business Secret Key
+    field_business_type?: { target_id: string | number }[]; // Taxonomy term
+    field_company?: { target_id: string | number }[]; // User reference
+    field_logo?: { target_id: string | number }[]; // Image (file entity ID)
+    user_picture?: { target_id: string | number }[]; // Image (file entity ID)
+    field_phone?: { value: string }[]; // Phone number
+    field_skills?: { target_id: string | number }[]; // Taxonomy term
 }
 
 // Define the async thunk with typed arguments and return value
-export const registerUser = createAsyncThunk<RegisterResponse, { requestData: RegisterData; role: string }, { rejectValue: string }>(
-    'user/register',
-    async ({ requestData }, { rejectWithValue }) => {
-      console.log('Registering user with data:', requestData);
-        try {
-            const response = await axios.post<RegisterResponse>(`${process.env.NEXT_PUBLIC_API_URL}/user/register?_format=json`, requestData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                },
-            });
-            console.log('Registration response:', response.data);
-            return response.data;
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
-            return rejectWithValue(errorMessage);
-        }
-    },
-);
+export const registerUser = createAsyncThunk<RegisterResponse, { requestData: RegisterData; role: string }, { rejectValue: string }>('user/register', async ({ requestData }, { rejectWithValue }) => {
+    console.log('Registering user with data:', requestData);
+    try {
+        const response = await axios.post<RegisterResponse>(`${process.env.NEXT_PUBLIC_API_URL}/user/register?_format=json`, requestData, {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+        });
+        console.log('Registration response:', response.data);
+        return response.data;
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+        return rejectWithValue(errorMessage);
+    }
+});
 
 // Define the user state type
 interface UserState {
