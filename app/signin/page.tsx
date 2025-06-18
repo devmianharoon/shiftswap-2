@@ -8,6 +8,8 @@ import Cookies from 'js-cookie';
 import { AppDispatch, IRootState } from '@/store';
 import { loginUser } from '@/store/AuthSlice';
 import { fetchUser } from '@/store/UserSlice';
+import { jwtDecode } from 'jwt-decode';
+import { decodeJWT, isTokenExpired } from '@/data/lib/token';
 
 export default function Page() {
     const [showPassword, setShowPassword] = useState(false);
@@ -21,9 +23,17 @@ export default function Page() {
         e.preventDefault();
         try {
             const result = await dispatch(loginUser({ email, password })).unwrap();
-            // const result2 = await dispatch(fetchUser(result.current_user.uid));
-            // Cookies.set('current_user', JSON.stringify(result2), { expires: 7, secure: true, sameSite: 'strict' });
-
+            console.log('Login successful:', result);
+            const token_decode = decodeJWT(result.token);
+            console.log('Decoded JWT:', token_decode);
+            if (typeof token_decode?.sub === 'string') {
+                const result2 = await dispatch(fetchUser(token_decode.sub)).unwrap();
+            } else {
+                throw new Error('Invalid token: subject (sub) is missing.');
+            }
+            // isTokenExpired(result.token);
+            console.log('Is token expired:', isTokenExpired(result.token));
+            Cookies.set('current_user_tt', JSON.stringify(result), { expires: 7, secure: true, sameSite: 'strict' });
             router.push('/dashboard/users/profile');
         } catch (err) {
             console.error('Login failed:', err);
