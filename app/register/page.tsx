@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '@/store/RegisterSlice';
-import { fetchSkills } from '@/store/skillsSlice'; // Import the new skills action
+import { fetchBusinessType } from '@/store/skillsSlice'; // Import the new skills action
 import { AppDispatch, IRootState } from '@/store';
 import axios from 'axios';
 
@@ -91,7 +91,7 @@ const RegisterPage = () => {
 
     useEffect(() => {
         // Dispatch action to fetch skills when component mounts
-        dispatch(fetchSkills());
+        dispatch(fetchBusinessType());
     }, [dispatch]);
 
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';

@@ -1,7 +1,9 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchSkills } from '@/store/skillsSlice'; // Import the skills action
+import { fetchSkills } from '@/store/skillsSlice';
 import { AppDispatch, IRootState } from '@/store';
+import { fetchCompanyMembers } from '@/store/MembersSlice';
 
 interface Option {
     id: string | number;
@@ -12,30 +14,55 @@ interface OptionMap {
     [key: string]: Option[];
 }
 
-const staticGroupTypeOptions: OptionMap = {
-    role: [
-        { id: 'sub_admin', label: 'Sub-admin' },
-        { id: 'marketing_manager', label: 'Marketing Manager' },
-    ],
-    user: [
-        { id: 101, label: 'John Doe' },
-        { id: 102, label: 'Jane Smith' },
-        { id: 103, label: 'Alice' },
-        { id: 104, label: 'Bob' },
-    ],
-};
-
 export default function FormComp() {
     const dispatch = useDispatch<AppDispatch>();
     const { skills, skillsLoading, skillsError } = useSelector((state: IRootState) => state.skills);
+    const members = useSelector((state: IRootState) => state.members.members);
+
     const [groupName, setGroupName] = useState('');
     const [description, setDescription] = useState('');
     const [groupType, setGroupType] = useState('');
     const [selectedOptions, setSelectedOptions] = useState<(string | number)[]>([]);
+    const [roles, setRoles] = useState<Option[]>([]);
+    const [rolesLoading, setRolesLoading] = useState(false);
+    const [rolesError, setRolesError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Fetch skills when component mounts
-        dispatch(fetchSkills());
+        const userData = localStorage.getItem('user_data');
+        if (!userData) {
+            console.error('No user data found in localStorage');
+            return;
+        }
+        try {
+            const user = JSON.parse(userData);
+            if (!user?.uid) {
+                console.error('Invalid user data: missing uid');
+                return;
+            }
+            dispatch(fetchSkills(user.business_type.tid));
+            dispatch(fetchCompanyMembers(user.business_id));
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+        }
+    }, [dispatch]);
+
+    useEffect(() => {
+        const fetchRoles = async () => {
+            setRolesLoading(true);
+            try {
+                const res = await fetch('https://drupal-shift-swap.asdev.tech/api/allowed_roles');
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const data: Option[] = await res.json();
+                setRoles(data);
+            } catch (error) {
+                console.error('Error fetching roles:', error);
+                setRolesError('Failed to load roles');
+            } finally {
+                setRolesLoading(false);
+            }
+        };
+
+        fetchRoles();
     }, [dispatch]);
 
     const handleGroupTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -43,8 +70,9 @@ export default function FormComp() {
         setSelectedOptions([]);
     };
 
-    const toggleOption = (id: string | number) => {
-        setSelectedOptions((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    const handleSelectChange = (selected: any) => {
+        const values = selected ? selected.map((item: any) => item.value) : [];
+        setSelectedOptions(values);
     };
 
     const handleSubmit = async (e: FormEvent) => {
@@ -52,31 +80,23 @@ export default function FormComp() {
 
         const payload: any = {
             title: groupName,
-            uid: 1, // Replace with actual user ID
+            uid: 1,
             group_type: groupType,
             description,
         };
 
-        if (groupType === 'role') {
-            payload.roles = selectedOptions as string[];
-        } else if (groupType === 'skill') {
-            payload.skills = selectedOptions as string[]; // API expects string IDs for skills
-        } else if (groupType === 'user') {
-            payload.users = selectedOptions as number[];
-        }
+        if (groupType === 'role') payload.roles = selectedOptions as string[];
+        else if (groupType === 'skill') payload.skills = selectedOptions as string[];
+        else if (groupType === 'user') payload.users = selectedOptions as number[];
 
         try {
             const res = await fetch('https://drupal-shift-swap.asdev.tech/api/business/group', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
 
             const data = await res.json();
-            console.log('API Response:', data);
-
             if (data.status === 'success') {
                 alert('Group created successfully!');
                 setGroupName('');
@@ -91,30 +111,49 @@ export default function FormComp() {
             alert('Request failed.');
         }
     };
-    console.log(skills);
 
-    // Dynamically create groupTypeOptions with skills from Redux
+    // ✅ Create userOptions dynamically from Redux members
+    const userOptions: Option[] = members.map((user) => ({
+        id: user.uid,
+        label: user.name,
+    }));
+
     const groupTypeOptions: OptionMap = {
-        ...staticGroupTypeOptions,
-        skill: skills.map((skill) => ({
-            id: skill.id,
-            label: skill.name,
-        })),
+        user: userOptions,
+        skill: skills.map((skill) => ({ id: skill.id, label: skill.name })),
+        role: roles,
     };
-    console.log(groupTypeOptions);
 
     const currentOptions = groupType ? groupTypeOptions[groupType] : [];
+    const reactSelectOptions = currentOptions.map((opt) => ({
+        value: opt.id,
+        label: opt.label,
+    }));
+
+    const selectedReactOptions = reactSelectOptions.filter((opt) => selectedOptions.includes(opt.value));
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6 p-6 w-full max-w-xl">
             <div>
                 <label className="block text-sm font-medium">Group Name *</label>
-                <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="Enter group name" className="mt-1 block w-full border rounded px-3 py-2" required />
+                <input
+                    type="text"
+                    value={groupName}
+                    onChange={(e) => setGroupName(e.target.value)}
+                    placeholder="Enter group name"
+                    className="mt-1 block w-full border rounded px-3 py-2"
+                    required
+                />
             </div>
 
             <div>
                 <label className="block text-sm font-medium">Group Type *</label>
-                <select value={groupType} onChange={handleGroupTypeChange} className="mt-1 block w-full border rounded px-3 py-2" required>
+                <select
+                    value={groupType}
+                    onChange={handleGroupTypeChange}
+                    className="mt-1 block w-full border rounded px-3 py-2"
+                    required
+                >
                     <option value="">Select type</option>
                     <option value="skill">Skills</option>
                     <option value="role">Role</option>
@@ -129,27 +168,32 @@ export default function FormComp() {
                         <p className="text-sm text-gray-500 mt-2">Loading skills...</p>
                     ) : groupType === 'skill' && skillsError ? (
                         <p className="text-sm text-red-500 mt-2">{skillsError}</p>
-                    ) : currentOptions.length > 0 ? (
-                        <div className="mt-2 grid grid-cols-2 gap-2">
-                            {currentOptions.map(({ id, label }) => (
-                                <div
-                                    key={id}
-                                    onClick={() => toggleOption(id)}
-                                    className={`cursor-pointer border rounded px-3 py-2 text-sm ${selectedOptions.includes(id) ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
-                                >
-                                    {label}
-                                </div>
-                            ))}
-                        </div>
+                    ) : groupType === 'role' && rolesLoading ? (
+                        <p className="text-sm text-gray-500 mt-2">Loading roles...</p>
+                    ) : groupType === 'role' && rolesError ? (
+                        <p className="text-sm text-red-500 mt-2">{rolesError}</p>
                     ) : (
-                        <p className="text-sm text-gray-500 mt-2">No {groupType} available</p>
+                        <div className="mt-2">
+                            <Select
+                                isMulti
+                                options={reactSelectOptions}
+                                value={selectedReactOptions}
+                                onChange={handleSelectChange}
+                                placeholder={`Select ${groupType}s...`}
+                            />
+                        </div>
                     )}
                 </div>
             )}
 
             <div>
                 <label className="block text-sm font-medium">Description</label>
-                <textarea placeholder="Enter group description..." value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2" />
+                <textarea
+                    placeholder="Enter group description..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="mt-1 block w-full border rounded px-3 py-2"
+                />
             </div>
 
             <div>

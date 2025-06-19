@@ -8,6 +8,8 @@ interface BackendMessage {
     recipient: string;
     encrypted_content: string;
     timestamp: number;
+    read: boolean; // <--- Add this
+    read_at?: number; // Optional property for read timestamp
 }
 
 interface DisplayMessage {
@@ -150,11 +152,13 @@ export const useChat = (userId: string, selectedRecipientId: string | null) => {
 
     // Format messages for ComponentsAppsChat
     const formattedMessages = messages.map((msg) => ({
-        fromUserId: msg.sender,
-        toUserId: msg.recipient,
-        text: decryptedMessages[msg.timestamp] || 'Decrypting...',
-        time: new Date(msg.timestamp).toLocaleTimeString(),
-    }));
+    fromUserId: msg.sender,
+    toUserId: msg.recipient,
+    text: decryptedMessages[msg.timestamp] || 'Decrypting...',
+    time: new Date(msg.timestamp).toLocaleTimeString(),
+    read: msg.read,
+    readAt: msg.read_at ? new Date(msg.read_at).toLocaleTimeString() : undefined,
+}));
 
     return { messages: formattedMessages, sendMessage };
 };

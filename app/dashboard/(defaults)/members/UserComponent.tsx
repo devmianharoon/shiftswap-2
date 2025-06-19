@@ -49,12 +49,10 @@ const UserComponent: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
-        if (parsedUserData?.uid) {
-            console.log(parsedUserData.uid);
-
-            dispatch(fetchCompanyMembers(parsedUserData.uid));
+        if (parsedUserData?.business_id) {
+            dispatch(fetchCompanyMembers(parsedUserData.business_id));
         }
-    }, [dispatch, parsedUserData?.uid]);
+    }, [dispatch, parsedUserData?.business_id]);
 
     const [defaultParams] = useState<Params>({
         id: null,
@@ -110,63 +108,59 @@ const UserComponent: React.FC = () => {
     }, []);
 
     // Assign roles to selected members
-   const assignRoles = async () => {
-    if (!selectedRole) {
-        showMessage('Please select a role.', 'error');
-        return;
-    }
-
-    if (selectedItems.length === 0) {
-        showMessage('Please select at least one member.', 'error');
-        return;
-    }
-
-    try {
-        setAssigningRoles(true);
-
-        const rawToken = Cookies.get('current_user_tt');
-        const parsed = rawToken ? JSON.parse(rawToken) : null;
-        const token = parsed?.token;
-
-        const cleanUserIds = selectedItems.map((id) => Number(id)).filter(Boolean);
-
-        for (const userId of cleanUserIds) {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/role_assignment`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    user_id: userId, // ✅ one user at a time
-                    roles: [selectedRole],
-                }),
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`API error for user ${userId}: ${response.status} – ${errorText}`);
-            }
+    const assignRoles = async () => {
+        if (!selectedRole) {
+            showMessage('Please select a role.', 'error');
+            return;
         }
 
-        // ✅ Update UI roles
-        setFilteredItems((prev) =>
-            prev.map((item) =>
-                cleanUserIds.includes(item.uid) ? { ...item, roles: [selectedRole] } : item
-            )
-        );
+        if (selectedItems.length === 0) {
+            showMessage('Please select at least one member.', 'error');
+            return;
+        }
 
-        showMessage('Roles assigned successfully.', 'success');
-        setSelectedItems([]);
-        setSelectedRole('');
-        setAssignRoleModal(false);
-    } catch (err: any) {
-        console.error('Assign Roles Error:', err);
-        showMessage('Failed to assign roles. Please try again.', 'error');
-    } finally {
-        setAssigningRoles(false);
-    }
-};
+        try {
+            setAssigningRoles(true);
+
+            const rawToken = Cookies.get('current_user_tt');
+            const parsed = rawToken ? JSON.parse(rawToken) : null;
+            const token = parsed?.token;
+
+            const cleanUserIds = selectedItems.map((id) => Number(id)).filter(Boolean);
+
+            for (const userId of cleanUserIds) {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/role_assignment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        user_id: userId, // ✅ one user at a time
+                        roles: [selectedRole],
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API error for user ${userId}: ${response.status} – ${errorText}`);
+                }
+            }
+
+            // ✅ Update UI roles
+            setFilteredItems((prev) => prev.map((item) => (cleanUserIds.includes(item.uid) ? { ...item, roles: [selectedRole] } : item)));
+
+            showMessage('Roles assigned successfully.', 'success');
+            setSelectedItems([]);
+            setSelectedRole('');
+            setAssignRoleModal(false);
+        } catch (err: any) {
+            console.error('Assign Roles Error:', err);
+            showMessage('Failed to assign roles. Please try again.', 'error');
+        } finally {
+            setAssigningRoles(false);
+        }
+    };
 
     const changeValue = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { value, id } = e.target;

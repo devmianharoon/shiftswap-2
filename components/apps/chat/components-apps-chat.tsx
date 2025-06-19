@@ -75,24 +75,8 @@ const ComponentsAppsChat = () => {
                 preview: 'Online',
                 active: true,
             });
-
-            // Determine company ID based on account_type
-            let companyId: string;
-            if (user.account_type === 'business') {
-                companyId = user.uid.toString();
-            } else if (user.account_type === 'member') {
-                if (!user.company?.id) {
-                    console.error('Invalid company data: missing company.id for member');
-                    return;
-                }
-                companyId = user.company.id;
-            } else {
-                console.error('Invalid account type:', user.account_type);
-                return;
-            }
-
-            console.log('Fetching members for companyId:', companyId);
-            dispatch(fetchCompanyMembers(companyId));
+            console.log('Fetching members for companyId:', user.business_id);
+            dispatch(fetchCompanyMembers(user.business_id));
         } catch (error) {
             console.error('Error parsing user data:', error);
         }
@@ -268,20 +252,15 @@ const ComponentsAppsChat = () => {
                                             <div key={index}>
                                                 <div className={`flex items-start gap-3 ${message.fromUserId === selectedUser.userId ? 'justify-start' : 'justify-end'}`}>
                                                     <div className={`flex-none ${message.fromUserId === selectedUser.userId ? '' : 'order-2'}`}>
-                                                        {message.fromUserId === selectedUser.userId ? (
-                                                            <img
-                                                                src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${selectedUser.path}`}
-                                                                className="h-10 w-10 rounded-full object-cover"
-                                                                alt=""
-                                                            />
-                                                        ) : (
-                                                            <img
-                                                                src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${loginUser?.path}`}
-                                                                className="h-10 w-10 rounded-full object-cover"
-                                                                alt=""
-                                                            />
-                                                        )}
+                                                        <img
+                                                            src={`https://drupal-shift-swap.asdev.tech/sites/default/files/${
+                                                                message.fromUserId === selectedUser.userId ? selectedUser.path : loginUser?.path
+                                                            }`}
+                                                            className="h-10 w-10 rounded-full object-cover"
+                                                            alt=""
+                                                        />
                                                     </div>
+
                                                     <div className="space-y-2">
                                                         <div className="flex items-center gap-3">
                                                             <div
@@ -293,12 +272,16 @@ const ComponentsAppsChat = () => {
                                                             >
                                                                 {message.text}
                                                             </div>
-                                                            <div className={`${message.fromUserId === selectedUser.userId ? '' : 'hidden'}`}>
-                                                                <IconMoodSmile className="hover:bg-primary" />
-                                                            </div>
                                                         </div>
-                                                        <div className={`text-xs text-white-dark ${message.fromUserId === selectedUser.userId ? '' : 'ltr:text-right rtl:text-left'}`}>
-                                                            {message.time}
+
+                                                        <div className={`text-xs text-white-dark flex flex-col ${message.fromUserId === selectedUser.userId ? '' : 'ltr:text-right rtl:text-left'}`}>
+                                                            <span>{message.time}</span>
+                                                            {/* ✅ Show "Read" status only for messages sent by the logged-in user */}
+                                                            {message.fromUserId === userId && (
+                                                                <span className={`mt-0.5 ${message.read ? 'text-green-600' : 'text-gray-400'}`}>
+                                                                    {message.read ? `Read${message.readAt ? ` at ${message.readAt}` : ''}` : 'Unread'}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>

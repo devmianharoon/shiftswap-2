@@ -20,7 +20,21 @@ const initialState: SkillsState = {
 };
 
 // Async thunk to fetch skills
-export const fetchSkills = createAsyncThunk('skills/fetchSkills', async (_, { rejectWithValue }) => {
+export const fetchSkills = createAsyncThunk('skills/fetchSkills', async (pid:string, { rejectWithValue }) => {
+    try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/business_types_and_skills`);
+        console.log("tid in apis",pid );
+        
+        // Filter skills where pid is null or undefined
+        const filteredSkills = response.data.filter((item: Skill) => item.pid == pid);
+        console.log("filtered Skils", filteredSkills);
+        
+        return filteredSkills;
+    } catch (error: any) {
+        return rejectWithValue(error.message || 'Failed to fetch skills');
+    }
+});
+export const fetchBusinessType = createAsyncThunk('skills/fetchSkills', async (_, { rejectWithValue }) => {
     try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/business_types_and_skills`);
         // Filter skills where pid is null or undefined
