@@ -49,10 +49,10 @@ const UserComponent: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
-        if (parsedUserData?.company?.id) {
+        if (parsedUserData?.business_id) {
             dispatch(fetchCompanyMembers(parsedUserData.business_id));
         }
-    }, [dispatch, parsedUserData?.company?.id]);
+    }, [dispatch, parsedUserData?.business_id]);
 
     const [defaultParams] = useState<Params>({
         id: null,
@@ -325,7 +325,14 @@ const UserComponent: React.FC = () => {
                                             </div>
                                         </td>
                                         <td>{member.email}</td>
-                                        <td className="whitespace-nowrap">{member.roles.join(', ')}</td>
+                                        <td className="whitespace-nowrap">
+                                            {member.roles.length > 1
+                                                ? member.roles
+                                                      .slice(1)
+                                                      .map((role) => role.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()))
+                                                      .join(', ')
+                                                : 'Member'}
+                                        </td>
                                         <td>
                                             <div className="flex items-center justify-center gap-4">
                                                 <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => editUser(member)}>

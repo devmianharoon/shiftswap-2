@@ -5,7 +5,7 @@ import userReducer from '@/store/RegisterSlice';
 import currentUserSlice from '@/store/UserSlice';
 import companyMembersReducer from '@/store/MembersSlice';
 import activityReducer from '@/store/activitySlice';
-
+import groupReducer from '@/store/GetGroupSlice';
 
 const rootReducer = combineReducers({
     themeConfig: themeConfigSlice,
@@ -13,8 +13,8 @@ const rootReducer = combineReducers({
     register: userReducer,
     currentUser: currentUserSlice,
     members: companyMembersReducer,
-    activity : activityReducer
-
+    activity: activityReducer,
+    getgroups: groupReducer,
 });
 
 export const store = configureStore({
