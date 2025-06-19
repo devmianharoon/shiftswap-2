@@ -313,7 +313,7 @@ const RegisterPage = () => {
                     name: [{ value: formData.email }],
                     field_account_type: [{ value: 'business' as 'business' }],
                     field_business_name: [{ value: formData.businessName }],
-                    // field_business_type: [{ target_id: formData.businessType }],
+                    field_business_type: [{ target_id: formData.businessType }],
                     field_logo: formData.logoFid ? [{ target_id: formData.logoFid }] : [],
                     user_picture: formData.userPictureFid ? [{ target_id: formData.userPictureFid }] : [],
                 };
