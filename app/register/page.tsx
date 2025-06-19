@@ -1,13 +1,15 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState, FormEvent, ChangeEvent } from 'react';
+import { useEffect, useState, ChangeEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '@/store/RegisterSlice'; // Adjust the import path as needed
-import { AppDispatch, IRootState } from '@/store'; // Adjust the import path as needed
+import { registerUser } from '@/store/RegisterSlice';
+import { fetchSkills } from '@/store/skillsSlice'; // Import the new skills action
+import { AppDispatch, IRootState } from '@/store';
 import axios from 'axios';
+
 interface Type {
     id: string;
     label: string;
@@ -21,6 +23,7 @@ interface CompanyDetails {
         uid: string;
     };
 }
+
 interface Skill {
     id: string;
     name: string;
@@ -32,7 +35,8 @@ const RegisterPage = () => {
     const role = searchParams.get('type'); // 'owner' or 'employee'
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
-    const { loading, error } = useSelector((state: IRootState) => state.register); // Use 'loading' instead of 'status'
+    const { loading, error } = useSelector((state: IRootState) => state.register);
+    const { skills, skillsLoading, skillsError } = useSelector((state: IRootState) => state.skills); // Access skills from Redux
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<{
         name: string;
@@ -85,16 +89,10 @@ const RegisterPage = () => {
     const [registrationComplete, setRegistrationComplete] = useState(false);
     const [companyDetails, setCompanyDetails] = useState<CompanyDetails | null>(null);
 
-    const [businessTypesData, setBusinessTypesData] = useState<Skill[]>([]);
-
     useEffect(() => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/business_types_and_skills`)
-            .then((res) => res.json())
-            .then((data) => setBusinessTypesData(data.filter((item: Skill) => !item.pid)))
-            .catch((err) => console.error('Error fetching skills:', err));
-    }, []);
-
-    console.log(businessTypesData);
+        // Dispatch action to fetch skills when component mounts
+        dispatch(fetchSkills());
+    }, [dispatch]);
 
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     const totalSteps = 2;
@@ -185,11 +183,6 @@ const RegisterPage = () => {
             const response = await axios.get<CompanyDetails>(`${baseUrl}/api/business/info/${secretCode}`);
             setCompanyDetails(response.data);
             console.log('Company details fetched:', response.data);
-            // setFormData((prev) => ({
-            //     ...prev,
-            //     companyType: response.data.companyType,
-            //     skillType: response.data.skillType,
-            // }));
         } catch (err: any) {
             setCompanyDetails(null);
             setErrors((prev) => ({ ...prev, secretCode: 'Invalid secret code. Please try again.' }));
@@ -264,10 +257,7 @@ const RegisterPage = () => {
         const file = e.target.files?.[0];
         if (file && file.type.startsWith('image/')) {
             try {
-                // Upload the file to the API
                 const { fid, path } = await uploadFile(file);
-
-                // Create a preview URL
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     if (typeof reader.result === 'string') {
@@ -307,7 +297,7 @@ const RegisterPage = () => {
             try {
                 const apiPayload = {
                     mail: [{ value: formData.email }],
-                    field_full_name :[{ value: formData.name }],
+                    field_full_name: [{ value: formData.name }],
                     pass: [{ value: formData.password }],
                     field_phone: [{ value: formData.phone }],
                     name: [{ value: formData.email }],
@@ -342,10 +332,9 @@ const RegisterPage = () => {
                     name: [{ value: formData.email }],
                     mail: [{ value: formData.email }],
                     pass: [{ value: formData.password }],
-                    field_full_name :[{ value: formData.name }],
+                    field_full_name: [{ value: formData.name }],
                     field_account_type: [{ value: 'member' as 'member' }],
                     field_phone: [{ value: formData.phone }],
-                    // field_secret_code: [{ value: formData.secretCode }],
                     field_company: [{ target_id: companyDetails.business.uid }],
                     field_skills: [{ target_id: formData.skillType }],
                     field_logo: formData.logoFid ? [{ target_id: formData.logoFid }] : [],
@@ -366,11 +355,10 @@ const RegisterPage = () => {
             }
         }
     };
-    // Bussiness Registration Step
+
     const renderStep = () => {
         switch (currentStep) {
             case 1:
-                // Bussines Types
                 return (
                     <div className="max-w-md animate-fadeIn">
                         <div className="mb-8">
@@ -402,9 +390,17 @@ const RegisterPage = () => {
                                     <option value="" disabled>
                                         Select an option
                                     </option>
-                                    {businessTypesData.map((item) => (
-                                        <option value={item.id}>{item.name}</option>
-                                    ))}
+                                    {skillsLoading ? (
+                                        <option disabled>Loading...</option>
+                                    ) : skillsError ? (
+                                        <option disabled>Error loading skills</option>
+                                    ) : (
+                                        skills.map((item: Skill) => (
+                                            <option key={item.id} value={item.id}>
+                                                {item.name}
+                                            </option>
+                                        ))
+                                    )}
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -413,6 +409,7 @@ const RegisterPage = () => {
                                 </div>
                             </div>
                             {errors.businessType && <p className="text-red-500 text-sm mt-1">{errors.businessType}</p>}
+                            {skillsError && <p className="text-red-500 text-sm mt-1">{skillsError}</p>}
                         </div>
                         <div className="mb-6">
                             <label className="block text-gray-900 font-medium mb-3">Upload your business logo</label>
@@ -586,7 +583,6 @@ const RegisterPage = () => {
                             </button>
                             <button
                                 onClick={handleSubmit}
-                                // disabled={isSubmitting || loading}
                                 className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center ${
                                     isSubmitting || loading ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'
                                 }`}
@@ -624,7 +620,6 @@ const RegisterPage = () => {
         }
     };
 
-    // Employee Registration Step
     const renderStepE = () => {
         switch (currentStep) {
             case 1:
@@ -659,7 +654,7 @@ const RegisterPage = () => {
                                         onChange={(e) => {
                                             setFormData((prev) => ({
                                                 ...prev,
-                                                skillType: e.target.value, // directly use id
+                                                skillType: e.target.value,
                                             }));
                                         }}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white"
@@ -708,7 +703,7 @@ const RegisterPage = () => {
                                 placeholder="ex: Jane Smith"
                                 value={formData.name}
                                 onChange={(e) => handleInputChange('name', e.target.value)}
-                                className={`w-full px-4 py-3 border particolari
+                                className={`w-full px-4 py-3 border ${
                                     errors.name ? 'border-red-500' : 'border-gray-300'
                                 } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
                             />

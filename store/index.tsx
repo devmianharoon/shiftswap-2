@@ -5,6 +5,7 @@ import userReducer from '@/store/RegisterSlice';
 import currentUserSlice from '@/store/UserSlice';
 import companyMembersReducer from '@/store/MembersSlice';
 import activityReducer from '@/store/activitySlice';
+import skillsReducer from '@/store/skillsSlice';
 
 
 const rootReducer = combineReducers({
@@ -13,7 +14,9 @@ const rootReducer = combineReducers({
     register: userReducer,
     currentUser: currentUserSlice,
     members: companyMembersReducer,
-    activity : activityReducer
+    activity : activityReducer,
+    skills: skillsReducer
+
 
 });
 
