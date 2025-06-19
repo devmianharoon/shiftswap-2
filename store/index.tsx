@@ -6,7 +6,7 @@ import currentUserSlice from '@/store/UserSlice';
 import companyMembersReducer from '@/store/MembersSlice';
 import activityReducer from '@/store/activitySlice';
 import skillsReducer from '@/store/skillsSlice';
-
+import groupReducer from '@/store/GetGroupSlice';
 
 const rootReducer = combineReducers({
     themeConfig: themeConfigSlice,
@@ -15,9 +15,8 @@ const rootReducer = combineReducers({
     currentUser: currentUserSlice,
     members: companyMembersReducer,
     activity : activityReducer,
-    skills: skillsReducer
-
-
+    skills: skillsReducer,
+    getgroups: groupReducer,
 });
 
 export const store = configureStore({
