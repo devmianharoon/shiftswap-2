@@ -73,7 +73,7 @@ const GroupTable = () => {
                                         <Dialog.Panel className="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 text-black dark:text-white-dark">
                                             <div className="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3 border border-b">
                                                 <h5 className="font-bold text-lg">Create New Group</h5>
-                                                <button type="button" onClick={() => setModal2(false)}>
+                                                <button type="button" onClick={() => `setModal2(false)`}>
                                                     <XMarkIcon className="w-5 h-5 cursor-pointer hover:text-red-500" title="Close" />
                                                 </button>
                                             </div>

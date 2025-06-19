@@ -81,12 +81,12 @@ const UserComponent: React.FC = () => {
         const fetchRoles = async () => {
             try {
                 setLoadingRoles(true);
-                const token = Cookies.get('token');
+                
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/allowed_roles`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(token && { Authorization: `Bearer ${token}` }),
+                        
                     },
                 });
                 if (!response.ok) {
@@ -321,7 +321,7 @@ const UserComponent: React.FC = () => {
                                                 {member.name && (
                                                     <div className="w-max">
                                                         <img
-                                                            src={`https://drupal-shift-swap.asdev.tech/sites/default/files${member.profile}`}
+                                                            src={`${process.env.NEXT_PUBLIC_BE_URL}/sites/default/files${member.profile}`}
                                                             className="h-8 w-8 rounded-full object-cover ltr:mr-2 rtl:ml-2"
                                                             alt="avatar"
                                                         />
