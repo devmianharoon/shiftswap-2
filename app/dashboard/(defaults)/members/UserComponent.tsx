@@ -50,7 +50,7 @@ const UserComponent: React.FC = () => {
 
     useEffect(() => {
         if (parsedUserData?.company?.id) {
-            dispatch(fetchCompanyMembers(parsedUserData.company.id));
+            dispatch(fetchCompanyMembers(parsedUserData.business_id));
         }
     }, [dispatch, parsedUserData?.company?.id]);
 
