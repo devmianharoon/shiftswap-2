@@ -7,7 +7,6 @@ import companyMembersReducer from '@/store/MembersSlice';
 import activityReducer from '@/store/activitySlice';
 import skillsReducer from '@/store/skillsSlice';
 import groupReducer from '@/store/GetGroupSlice';
-import createGroupReducer from './CreateGroupSlice';
 import deleteGroupReducer from '@/store/DeleteGroup';
 import createGroupReducer from '@/store/CreateGroup';
 
@@ -22,7 +21,6 @@ const rootReducer = combineReducers({
     getgroups: groupReducer,
     createGroup:createGroupReducer,
     deleteGroup: deleteGroupReducer,
-    createGroup: createGroupReducer,
 });
 
 export const store = configureStore({

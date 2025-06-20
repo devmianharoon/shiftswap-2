@@ -3,7 +3,7 @@ import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSkills } from '@/store/skillsSlice';
 import { fetchCompanyMembers } from '@/store/MembersSlice';
-import { createGroup } from '@/store/CreateGroup';
+import { resetGroupState, saveGroup } from '@/store/CreateGroup';
 import { getBusinessTypeTid } from '@/data/lib/helperFunction';
 import { AppDispatch, IRootState } from '@/store';
 
@@ -16,7 +16,12 @@ interface OptionMap {
     [key: string]: Option[];
 }
 
-export default function FormComp() {
+interface FormCompProps {
+    groupToEdit?: any; // Group data for editing
+    onClose: () => void; // Callback to close the modal
+}
+
+export default function FormComp({ groupToEdit, onClose }: FormCompProps) {
     const dispatch = useDispatch<AppDispatch>();
     const { skills, skillsLoading, skillsError } = useSelector((state: IRootState) => state.skills);
     const { members } = useSelector((state: IRootState) => state.members);
@@ -28,6 +33,29 @@ export default function FormComp() {
     const [rolesLoading, setRolesLoading] = useState(false);
     const [rolesError, setRolesError] = useState<string | null>(null);
     const [companyId, setCompanyId] = useState<string>('');
+    const { success, error: saveError, loading: saveLoading } = useSelector((state: IRootState) => state.createGroup);
+
+    // Pre-fill form with groupToEdit data
+    useEffect(() => {
+        if (groupToEdit) {
+            setGroupName(groupToEdit.title || '');
+            setDescription(groupToEdit.body || '');
+            setGroupType(groupToEdit.group_type || '');
+            if (groupToEdit.group_type === 'user') {
+                setSelectedOptions(groupToEdit.field_users || []);
+            } else if (groupToEdit.group_type === 'skill') {
+                setSelectedOptions(groupToEdit.feild_skills || []);
+            } else if (groupToEdit.group_type === 'role') {
+                setSelectedOptions(groupToEdit.roles || []);
+            }
+        } else {
+            // Reset form for create mode
+            setGroupName('');
+            setDescription('');
+            setGroupType('');
+            setSelectedOptions([]);
+        }
+    }, [groupToEdit]);
 
     useEffect(() => {
         const userData = localStorage.getItem('user_data');
@@ -48,12 +76,21 @@ export default function FormComp() {
             console.error('Error parsing user data:', error);
         }
     }, [dispatch]);
-
+    useEffect(() => {
+        if (success) {
+            setGroupName('');
+            setDescription('');
+            setGroupType('');
+            setSelectedOptions([]);
+            onClose();
+            dispatch(resetGroupState());
+        }
+    }, [success, onClose, dispatch]);
     useEffect(() => {
         const fetchRoles = async () => {
             setRolesLoading(true);
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/allowed_roles`);
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/allowed_roles`);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data: Option[] = await res.json();
                 setRoles(data);
@@ -68,8 +105,6 @@ export default function FormComp() {
         fetchRoles();
     }, []);
 
- 
-
     const handleGroupTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         setGroupType(e.target.value);
         setSelectedOptions([]);
@@ -79,33 +114,31 @@ export default function FormComp() {
         const values = selected ? selected.map((item: any) => item.value) : [];
         setSelectedOptions(values);
     };
-
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         const payload: any = {
             title: groupName,
             field_group_type: groupType,
-            body : description,
-            field_users: groupType === 'user' ? selectedOptions : [],
-            field_company: getBusinessTypeTid(), // Assuming company ID is 1 for now
-
+            body: description,
+            field_company: getBusinessTypeTid(),
         };
 
         if (groupType === 'role') payload.roles = selectedOptions as string[];
-        else if (groupType === 'skill') payload.skills = selectedOptions as string[];
-        else if (groupType === 'user') payload.users = selectedOptions as number[];
-          dispatch(createGroup(payload
-        //     {
-        //     title: payload.title,
-        //     field_group_type: payload.groupType,
-        //     field_users: payload.users || [],
-        //     field_company: getBusinessTypeTid(), // Assuming company ID is 1 for now
-        //     body : payload.description,
-        // }
-    ))
+        else if (groupType === 'skill') payload.feild_skills = selectedOptions as string[];
+        else if (groupType === 'user') payload.field_users = selectedOptions as number[];
+
+        if (groupToEdit) {
+            payload.node_id = groupToEdit.id;
+        }
+
+        try {
+            await dispatch(saveGroup(payload)).unwrap();
+        } catch (error) {
+            console.error('Failed to save group:', error);
+        }
     };
 
-    const userOptions: Option[] = members.map((user) => ({
+    const userOptions: Option[] = members.members.map((user) => ({
         id: user.uid,
         label: user.name,
     }));
@@ -127,14 +160,7 @@ export default function FormComp() {
         <form onSubmit={handleSubmit} className="space-y-6 p-6 w-full max-w-xl">
             <div>
                 <label className="block text-sm font-medium">Group Name *</label>
-                <input
-                    type="text"
-                    value={groupName}
-                    onChange={(e) => setGroupName(e.target.value)}
-                    placeholder="Enter group name"
-                    className="mt-1 block w-full border rounded px-3 py-2"
-                    required
-                />
+                <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="Enter group name" className="mt-1 block w-full border rounded px-3 py-2" required />
             </div>
 
             <div>
@@ -144,6 +170,7 @@ export default function FormComp() {
                     onChange={handleGroupTypeChange}
                     className="mt-1 block w-full border rounded px-3 py-2"
                     required
+                    disabled={!!groupToEdit} // Disable group type change in edit mode
                 >
                     <option value="">Select type</option>
                     <option value="skill">Skills</option>
@@ -151,7 +178,8 @@ export default function FormComp() {
                     <option value="user">Users</option>
                 </select>
             </div>
-
+            {saveError && <p className="text-red-500">{saveError}</p>}
+            {success && <p className="text-green-500">Group saved successfully!</p>}
             {groupType && (
                 <div>
                     <label className="block text-sm font-medium capitalize">Select {groupType}</label>
@@ -165,13 +193,7 @@ export default function FormComp() {
                         <p className="text-sm text-red-500 mt-2">{rolesError}</p>
                     ) : (
                         <div className="mt-2">
-                            <Select
-                                isMulti
-                                options={reactSelectOptions}
-                                value={selectedReactOptions}
-                                onChange={handleSelectChange}
-                                placeholder={`Select ${groupType}s...`}
-                            />
+                            <Select isMulti options={reactSelectOptions} value={selectedReactOptions} onChange={handleSelectChange} placeholder={`Select ${groupType}s...`} />
                         </div>
                     )}
                 </div>
@@ -179,17 +201,12 @@ export default function FormComp() {
 
             <div>
                 <label className="block text-sm font-medium">Description</label>
-                <textarea
-                    placeholder="Enter group description..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="mt-1 block man w-full border rounded px-3 py-2"
-                />
+                <textarea placeholder="Enter group description..." value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2" />
             </div>
 
-            <div>
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    Create Group
+            <div className="flex justify-end">
+                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" disabled={saveLoading}>
+                    {saveLoading ? 'Saving...' : groupToEdit ? 'Update Group' : 'Create Group'}
                 </button>
             </div>
         </form>

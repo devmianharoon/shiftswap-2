@@ -2,26 +2,28 @@
 import { GroupData } from '@/data/types/GetGroupTypes';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-// import { GroupData } from '../../types/groupTypes';
 
 interface GroupState {
-  data: GroupData[];
+  data: GroupData;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: GroupState = {
-  data: [],
+  data: {
+    groups: [],
+    total: 0,
+  },
   loading: false,
   error: null,
 };
 
 // Async thunk to fetch groups
-export const fetchGroups = createAsyncThunk<GroupData[], string>(
+export const fetchGroups = createAsyncThunk<GroupData, string>(
   'groups/fetchGroups',
   async (companyId, thunkAPI) => {
     try {
-      const response = await axios.get<GroupData[]>(
+      const response = await axios.get<GroupData>(
         `${process.env.NEXT_PUBLIC_BE_URL}/company/${companyId}/groups`,
         {
           headers: { accept: 'application/json' },

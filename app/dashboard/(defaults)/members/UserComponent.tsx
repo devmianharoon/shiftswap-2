@@ -46,6 +46,8 @@ const UserComponent: React.FC = () => {
     const userData = localStorage.getItem('user_data');
     const parsedUserData = userData ? JSON.parse(userData) : null;
     const { members } = useSelector((state: IRootState) => state.members);
+    console.log('Members:', members.members);
+    
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
@@ -68,12 +70,12 @@ const UserComponent: React.FC = () => {
     const [roles, setRoles] = useState<Role[]>([]);
     const [loadingRoles, setLoadingRoles] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [filteredItems, setFilteredItems] = useState<Contact[]>(members);
+    const [filteredItems, setFilteredItems] = useState<Contact[]>(members.members);
     const [assigningRoles, setAssigningRoles] = useState<boolean>(false);
 
     // Update filteredItems when members or search changes
     useEffect(() => {
-        setFilteredItems(() => members.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())));
+        setFilteredItems(() => members.members.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())));
     }, [search, members]);
 
     // Fetch roles from API on component mount

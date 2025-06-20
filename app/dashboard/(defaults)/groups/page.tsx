@@ -6,18 +6,28 @@ import { MessageCircle } from 'lucide-react';
 import { PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
 import { useDispatch, useSelector } from 'react-redux';
-// import { fetchGroups } from '@/store/slices/groupSlice'; // Adjust path if needed
 import { IRootState, AppDispatch } from '@/store';
 import FormComp from './FormComp';
 import { fetchGroups } from '@/store/GetGroupSlice';
 import { deleteGroup } from '@/store/DeleteGroup';
-
+import { resetGroupState } from '@/store/CreateGroup';
+import { Group } from '@/data/types/GetGroupTypes';
 const GroupTable = () => {
     const [modal2, setModal2] = useState(false);
-
+    const [selectedGroup, setSelectedGroup] = useState<any>(null); // State to hold group data for editing
+    const { success, error: saveError } = useSelector((state: IRootState) => state.createGroup);
     const dispatch = useDispatch<AppDispatch>();
     const { data: groupData, loading, error } = useSelector((state: IRootState) => state.getgroups);
-
+    console.log('Group Data:', groupData.groups);
+    useEffect(() => {
+        if (success) {
+            setModal2(false); // Close modal on successful save
+            setSelectedGroup(null); // Clear selected group
+            dispatch(resetGroupState()); // Reset group state
+        }
+    }, [success, dispatch]);
+    // Fetch groups when the component mounts
+    // and when the user data changes
     useEffect(() => {
         const userData = localStorage.getItem('user_data');
         if (!userData) {
@@ -35,14 +45,33 @@ const GroupTable = () => {
             console.error('Error parsing user data:', error);
         }
     }, [dispatch]);
+
     const handleDeleteGroup = async (node_id: string) => {
-        
         try {
             await dispatch(deleteGroup({ node_id }));
-
+            const userData = localStorage.getItem('user_data');
+            if (userData) {
+                const user = JSON.parse(userData);
+                if (user?.business_id) {
+                    dispatch(fetchGroups(user.business_id)); // Refetch groups after delete
+                }
+            }
         } catch (error) {
             console.error('Delete failed', error);
         }
+    };
+
+    const handleUpdateGroup = (node_id: string) => {
+        const group = groupData.groups.find((group) => group.id === node_id);
+        if (group) {
+            setSelectedGroup(group); // Set the group to edit
+            setModal2(true); // Open the modal
+        }
+    };
+
+    const handleCreateGroup = () => {
+        setSelectedGroup(null); // Clear selected group for create mode
+        setModal2(true); // Open the modal
     };
 
     return (
@@ -52,7 +81,7 @@ const GroupTable = () => {
                 <h2 className="text-[28px]">Groups</h2>
                 <div className="mb-5">
                     <div className="flex items-center justify-center">
-                        <button type="button" onClick={() => setModal2(true)} className="btn btn-info">
+                        <button type="button" onClick={handleCreateGroup} className="btn btn-info">
                             + Create Group
                         </button>
                     </div>
@@ -82,13 +111,13 @@ const GroupTable = () => {
                                     >
                                         <Dialog.Panel className="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 text-black dark:text-white-dark">
                                             <div className="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3 border border-b">
-                                                <h5 className="font-bold text-lg">Create New Group</h5>
-                                                <button type="button" onClick={() => `setModal2(false)`}>
+                                                <h5 className="font-bold text-lg">{selectedGroup ? 'Update Group' : 'Create New Group'}</h5>
+                                                <button type="button" onClick={() => setModal2(false)}>
                                                     <XMarkIcon className="w-5 h-5 cursor-pointer hover:text-red-500" title="Close" />
                                                 </button>
                                             </div>
                                             <div className="p-5">
-                                                <FormComp />
+                                                <FormComp groupToEdit={selectedGroup} onClose={() => setModal2(false)} />
                                                 <div className="flex justify-end items-center mt-8">
                                                     <button type="button" className="btn btn-primary ltr:ml-4 rtl:mr-4" onClick={() => setModal2(false)}>
                                                         Close
@@ -107,6 +136,8 @@ const GroupTable = () => {
             {/* Table */}
             {loading && <p>Loading...</p>}
             {error && <p className="text-red-500">Error: {error}</p>}
+            {saveError && <p className="text-red-500 mb-4">{saveError}</p>}
+            {success && <p className="text-green-500 mb-4">Group saved successfully!</p>}
             {!loading && !error && (
                 <table>
                     <thead>
@@ -117,7 +148,7 @@ const GroupTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {groupData.map((data, idx) => (
+                        {groupData.groups.map((data : Group, idx) => (
                             <tr key={idx}>
                                 <td>
                                     <div className="whitespace-nowrap">{data.title}</div>
@@ -130,7 +161,7 @@ const GroupTable = () => {
                                         </button>
                                     </Tippy>
                                     <Tippy content="Edit">
-                                        <button type="button" className="px-2">
+                                        <button type="button" className="px-2" onClick={() => handleUpdateGroup(data.id)}>
                                             <PencilIcon className="w-[20px] h-[20px] cursor-pointer " />
                                         </button>
                                     </Tippy>

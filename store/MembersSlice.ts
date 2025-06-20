@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-interface Member {
+export interface Member {
   uid: number;
   name: string;
   email: string;
@@ -22,15 +22,21 @@ interface Member {
   logo: string | null;
   company_info: any | null;
 }
-
+interface MemberData {
+  members : Member[];
+  total: string;
+}
 interface CompanyMembersState {
-  members: Member[];
+  members: MemberData;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: CompanyMembersState = {
-  members: [],
+  members: {
+    members: [],
+    total: "0",
+  },
   loading: false,
   error: null,
 };
@@ -54,7 +60,7 @@ const companyMembersSlice = createSlice({
   initialState,
   reducers: {
     clearMembers: (state) => {
-      state.members = [];
+      state.members = { members: [], total: "0" };
       state.error = null;
     },
   },
