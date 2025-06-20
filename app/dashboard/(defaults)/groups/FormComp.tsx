@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchSkills } from '@/store/skillsSlice';
 import { AppDispatch, IRootState } from '@/store';
 import { fetchCompanyMembers } from '@/store/MembersSlice';
+import { createGroup } from '@/store/CreateGroup';
+import { getBusinessTypeTid } from '@/data/lib/helperFunction';
 
 interface Option {
     id: string | number;
@@ -77,39 +79,27 @@ export default function FormComp() {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-
         const payload: any = {
             title: groupName,
-            uid: 1,
-            group_type: groupType,
-            description,
+            field_group_type: groupType,
+            body : description,
+            field_users: groupType === 'user' ? selectedOptions : [],
+            field_company: getBusinessTypeTid(), // Assuming company ID is 1 for now
+
         };
 
         if (groupType === 'role') payload.roles = selectedOptions as string[];
         else if (groupType === 'skill') payload.skills = selectedOptions as string[];
         else if (groupType === 'user') payload.users = selectedOptions as number[];
-
-        try {
-            const res = await fetch('https://drupal-shift-swap.asdev.tech/api/business/group', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-
-            const data = await res.json();
-            if (data.status === 'success') {
-                alert('Group created successfully!');
-                setGroupName('');
-                setDescription('');
-                setGroupType('');
-                setSelectedOptions([]);
-            } else {
-                alert('Failed: ' + data.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Request failed.');
-        }
+          dispatch(createGroup(payload
+        //     {
+        //     title: payload.title,
+        //     field_group_type: payload.groupType,
+        //     field_users: payload.users || [],
+        //     field_company: getBusinessTypeTid(), // Assuming company ID is 1 for now
+        //     body : payload.description,
+        // }
+    ))
     };
 
     // ✅ Create userOptions dynamically from Redux members
