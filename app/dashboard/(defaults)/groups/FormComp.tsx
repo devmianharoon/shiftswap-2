@@ -2,10 +2,10 @@ import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSkills } from '@/store/skillsSlice';
-import { AppDispatch, IRootState } from '@/store';
 import { fetchCompanyMembers } from '@/store/MembersSlice';
 import { createGroup } from '@/store/CreateGroup';
 import { getBusinessTypeTid } from '@/data/lib/helperFunction';
+import { AppDispatch, IRootState } from '@/store';
 
 interface Option {
     id: string | number;
@@ -19,8 +19,7 @@ interface OptionMap {
 export default function FormComp() {
     const dispatch = useDispatch<AppDispatch>();
     const { skills, skillsLoading, skillsError } = useSelector((state: IRootState) => state.skills);
-    const members = useSelector((state: IRootState) => state.members.members);
-
+    const { members } = useSelector((state: IRootState) => state.members);
     const [groupName, setGroupName] = useState('');
     const [description, setDescription] = useState('');
     const [groupType, setGroupType] = useState('');
@@ -28,6 +27,7 @@ export default function FormComp() {
     const [roles, setRoles] = useState<Option[]>([]);
     const [rolesLoading, setRolesLoading] = useState(false);
     const [rolesError, setRolesError] = useState<string | null>(null);
+    const [companyId, setCompanyId] = useState<string>('');
 
     useEffect(() => {
         const userData = localStorage.getItem('user_data');
@@ -37,10 +37,11 @@ export default function FormComp() {
         }
         try {
             const user = JSON.parse(userData);
-            if (!user?.uid) {
-                console.error('Invalid user data: missing uid');
+            if (!user?.uid || !user?.business_id) {
+                console.error('Invalid user data: missing uid or business_id');
                 return;
             }
+            setCompanyId(user.business_id);
             dispatch(fetchSkills(user.business_type.tid));
             dispatch(fetchCompanyMembers(user.business_id));
         } catch (error) {
@@ -52,7 +53,7 @@ export default function FormComp() {
         const fetchRoles = async () => {
             setRolesLoading(true);
             try {
-                const res = await fetch('https://drupal-shift-swap.asdev.tech/api/allowed_roles');
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BE_URL}/api/allowed_roles`);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data: Option[] = await res.json();
                 setRoles(data);
@@ -65,7 +66,9 @@ export default function FormComp() {
         };
 
         fetchRoles();
-    }, [dispatch]);
+    }, []);
+
+ 
 
     const handleGroupTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         setGroupType(e.target.value);
@@ -102,7 +105,6 @@ export default function FormComp() {
     ))
     };
 
-    // ✅ Create userOptions dynamically from Redux members
     const userOptions: Option[] = members.map((user) => ({
         id: user.uid,
         label: user.name,
@@ -119,7 +121,6 @@ export default function FormComp() {
         value: opt.id,
         label: opt.label,
     }));
-
     const selectedReactOptions = reactSelectOptions.filter((opt) => selectedOptions.includes(opt.value));
 
     return (
@@ -182,7 +183,7 @@ export default function FormComp() {
                     placeholder="Enter group description..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="mt-1 block w-full border rounded px-3 py-2"
+                    className="mt-1 block man w-full border rounded px-3 py-2"
                 />
             </div>
 
