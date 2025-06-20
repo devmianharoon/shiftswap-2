@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '@/store';
 import FormComp from './FormComp';
 import { fetchGroups } from '@/store/GetGroupSlice';
+import { deleteGroup } from '@/store/DeleteGroup';
 
 const GroupTable = () => {
     const [modal2, setModal2] = useState(false);
@@ -34,6 +35,15 @@ const GroupTable = () => {
             console.error('Error parsing user data:', error);
         }
     }, [dispatch]);
+    const handleDeleteGroup = async (node_id: string) => {
+        
+        try {
+            await dispatch(deleteGroup({ node_id }));
+
+        } catch (error) {
+            console.error('Delete failed', error);
+        }
+    };
 
     return (
         <div className="table-responsive mb-5">
@@ -125,7 +135,7 @@ const GroupTable = () => {
                                         </button>
                                     </Tippy>
                                     <Tippy content="Delete">
-                                        <button type="button" className="px-2">
+                                        <button type="button" className="px-2" onClick={() => handleDeleteGroup(data.id)}>
                                             <TrashIcon className="w-[20px] h-[20px] cursor-pointer " />
                                         </button>
                                     </Tippy>
