@@ -4,6 +4,7 @@ export interface MappedItem {
 }
 
 export interface GroupData {
+  id : string;
   title: string;
   group_type: string;
   mapped_data: MappedItem[];
