@@ -22,8 +22,7 @@ const data = [
 ];
 const manageSwapRequests = () => {
      const [filters, setFilters] = useState({ date: '', shiftType: '', status: '', search: '' });
-        const [modal2, setModal2] = useState(false);
-    
+        const [modal2, setModal2] = useState(false);   
         const [currentPage, setCurrentPage] = useState(1);
         const itemsPerPage = 9;
     

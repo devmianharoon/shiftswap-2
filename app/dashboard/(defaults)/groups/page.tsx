@@ -13,10 +13,13 @@ import { deleteGroup, resetDeleteState } from '@/store/DeleteGroup';
 import { resetGroupState } from '@/store/CreateGroup';
 import { Group } from '@/data/types/GetGroupTypes';
 import { Popconfirm, Alert } from 'antd';
+import { Pagination } from 'antd';
 
 const GroupTable = () => {
     const [modal2, setModal2] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState<any>(null); // State to hold group data for editing
+    const [currentPage, setCurrentPage] = useState<number>(1);
+
     const [alertInfo, setAlertInfo] = useState<{
         message: string;
         type: 'success' | 'error' | 'info' | 'warning';
@@ -49,11 +52,11 @@ const GroupTable = () => {
                 console.error('Invalid user data: missing uid');
                 return;
             }
-            dispatch(fetchGroups(user.business_id));
+            dispatch(fetchGroups({ companyId: user.business_id, page: currentPage }));
         } catch (error) {
             console.error('Error parsing user data:', error);
         }
-    }, [dispatch]);
+    }, [dispatch ,currentPage]);
     // Handle delete group actions
     const handleDeleteGroup = async (node_id: string) => {
         try {
@@ -62,7 +65,7 @@ const GroupTable = () => {
             if (userData) {
                 const user = JSON.parse(userData);
                 if (user?.business_id) {
-                    dispatch(fetchGroups(user.business_id));
+                    dispatch(fetchGroups({ companyId: user.business_id, page: currentPage }));
                 }
             }
         } catch (error) {
@@ -92,7 +95,6 @@ const GroupTable = () => {
 
     // Handle update group actions
     const handleUpdateGroup = (node_id: string) => {
-
         const group = groupData.groups.find((group) => group.id === node_id);
         if (group) {
             setSelectedGroup(group); // Set the group to edit
@@ -165,11 +167,11 @@ const GroupTable = () => {
                                             </div>
                                             <div className="p-5">
                                                 <FormComp groupToEdit={selectedGroup} onClose={() => setModal2(false)} />
-                                                <div className="flex justify-end items-center mt-8">
+                                                {/* <div className="flex justify-end items-center mt-8">
                                                     <button type="button" className="btn btn-primary ltr:ml-4 rtl:mr-4" onClick={() => setModal2(false)}>
                                                         Close
                                                     </button>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </Dialog.Panel>
                                     </Transition.Child>
@@ -182,9 +184,6 @@ const GroupTable = () => {
 
             {/* Table */}
             {loading && <p>Loading...</p>}
-            {error && <p className="text-red-500">Error: {error}</p>}
-            {saveError && <p className="text-red-500 mb-4">{saveError}</p>}
-            {success && <p className="text-green-500 mb-4">Group saved successfully!</p>}
             {!loading && !error && (
                 <table>
                     <thead>
@@ -227,6 +226,9 @@ const GroupTable = () => {
                     </tbody>
                 </table>
             )}
+            <div>
+                <Pagination current={currentPage} total={groupData.total} showSizeChanger={false} pageSize={50} className="mt-4" onChange={(page) => setCurrentPage(page)} />
+            </div>
         </div>
     );
 };

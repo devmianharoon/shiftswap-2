@@ -19,12 +19,12 @@ const initialState: GroupState = {
 };
 
 // Async thunk to fetch groups
-export const fetchGroups = createAsyncThunk<GroupData, string>(
+export const fetchGroups = createAsyncThunk<GroupData, { companyId: string; page?: number }>(
   'groups/fetchGroups',
-  async (companyId, thunkAPI) => {
+  async ({ companyId, page }, thunkAPI) => {
     try {
       const response = await axios.get<GroupData>(
-        `${process.env.NEXT_PUBLIC_BE_URL}/company/${companyId}/groups`,
+        `${process.env.NEXT_PUBLIC_BE_URL}/company/${companyId}/groups?page=${page}`,
         {
           headers: { accept: 'application/json' },
         }

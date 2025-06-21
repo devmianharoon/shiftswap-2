@@ -9,7 +9,9 @@ import skillsReducer from '@/store/skillsSlice';
 import groupReducer from '@/store/GetGroupSlice';
 import deleteGroupReducer from '@/store/DeleteGroup';
 import createGroupReducer from '@/store/CreateGroup';
-
+import shiftReducer from '@/store/GetShiftsSlice';
+import shiftOperationReducer from '@/store/CreateOrUpdateShiftSlice';
+import rolesReducer from '@/store/RoleSlice';
 const rootReducer = combineReducers({
     themeConfig: themeConfigSlice,
     auth: authReducer,
@@ -19,8 +21,11 @@ const rootReducer = combineReducers({
     activity: activityReducer,
     skills: skillsReducer,
     getgroups: groupReducer,
-    createGroup:createGroupReducer,
+    createGroup: createGroupReducer,
     deleteGroup: deleteGroupReducer,
+    getShifts: shiftReducer,
+    createOrUpdateShift: shiftOperationReducer,
+    roles: rolesReducer,
 });
 
 export const store = configureStore({

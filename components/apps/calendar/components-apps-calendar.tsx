@@ -1,13 +1,21 @@
 'use client';
+
 import IconPlus from '@/components/icon/icon-plus';
 import IconX from '@/components/icon/icon-x';
 import { Transition, Dialog, DialogBackdrop, TransitionChild, DialogPanel } from '@headlessui/react';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchShifts } from '@/store/GetShiftsSlice';
+import { IRootState, AppDispatch } from '@/store';
+import { createOrUpdateShift } from '@/store/CreateOrUpdateShiftSlice';
+import Select from 'react-select';
+import { fetchCompanyMembers } from '@/store/MembersSlice';
+import { Popconfirm } from 'antd';
 
 const ComponentsAppsCalendar = () => {
     const now = new Date();
@@ -17,108 +25,17 @@ const ComponentsAppsCalendar = () => {
         return str;
     };
 
-    const [events, setEvents] = useState<any>([
-        // {
-        //     id: 1,
-        //     title: 'All Day Event',
-        //     start: now.getFullYear() + '-' + getMonth(now) + '-01T14:30:00',
-        //     end: now.getFullYear() + '-' + getMonth(now) + '-02T14:30:00',
-        //     className: 'danger',
-        //     description: 'Aenean fermentum quam vel sapien rutrum cursus. Vestibulum imperdiet finibus odio, nec tincidunt felis facilisis eu.',
-        // },
-        // {
-        //     id: 2,
-        //     title: 'Site Visit',
-        //     start: now.getFullYear() + '-' + getMonth(now) + '-07T19:30:00',
-        //     end: now.getFullYear() + '-' + getMonth(now) + '-08T14:30:00',
-        //     className: 'primary',
-        //     description: 'Etiam a odio eget enim aliquet laoreet. Vivamus auctor nunc ultrices varius lobortis.',
-        // },
-        // {
-        //     id: 3,
-        //     title: 'Product Lunching Event',
-        //     start: now.getFullYear() + '-' + getMonth(now) + '-17T14:30:00',
-        //     end: now.getFullYear() + '-' + getMonth(now) + '-18T14:30:00',
-        //     className: 'info',
-        //     description: 'Proin et consectetur nibh. Mauris et mollis purus. Ut nec tincidunt lacus. Nam at rutrum justo, vitae egestas dolor.',
-        // },
-        // {
-        //     id: 4,
-        //     title: 'Meeting',
-        //     start: now.getFullYear() + '-' + getMonth(now) + '-12T10:30:00',
-        //     end: now.getFullYear() + '-' + getMonth(now) + '-13T10:30:00',
-        //     className: 'danger',
-        //     description: 'Mauris ut mauris aliquam, fringilla sapien et, dignissim nisl. Pellentesque ornare velit non mollis fringilla.',
-        // },
-        // {
-        //     id: 5,
-        //     title: 'Lunch',
-        //     start: now.getFullYear() + '-' + getMonth(now) + '-12T15:00:00',
-        //     end: now.getFullYear() + '-' + getMonth(now) + '-13T15:00:00',
-        //     className: 'info',
-        //     description: 'Integer fermentum bibendum elit in egestas. Interdum et malesuada fames ac ante ipsum primis in faucibus.',
-        // },
-        // {
-        //     id: 6,
-        //     title: 'Conference',
-        //     start: now.getFullYear() + '-' + getMonth(now) + '-12T21:30:00',
-        //     end: now.getFullYear() + '-' + getMonth(now) + '-13T21:30:00',
-        //     className: 'success',
-        //     description:
-        //         'Curabitur facilisis vel elit sed dapibus. Nunc sagittis ex nec ante facilisis, sed sodales purus rhoncus. Donec est sapien, porttitor et feugiat sed, eleifend quis sapien. Sed sit amet maximus dolor.',
-        // },
-        // {
-        //     id: 7,
-        //     title: 'Happy Hour',
-        //     start: now.getFullYear() + '-' + getMonth(now) + '-12T05:30:00',
-        //     end: now.getFullYear() + '-' + getMonth(now) + '-13T05:30:00',
-        //     className: 'info',
-        //     description: ' odio lectus, porttitor molestie scelerisque blandit, hendrerit sed ex. Aenean malesuada iaculis erat, vitae blandit nisl accumsan ut.',
-        // },
-        // {
-        //     id: 8,
-        //     title: 'Dinner',
-        //     start: now.getFullYear() + '-' + getMonth(now) + '-12T20:00:00',
-        //     end: now.getFullYear() + '-' + getMonth(now) + '-13T20:00:00',
-        //     className: 'danger',
-        //     description: 'Sed purus urna, aliquam et pharetra ut, efficitur id mi. Pellentesque ut convallis velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        // },
-        // {
-        //     id: 9,
-        //     title: 'Birthday Party',
-        //     start: now.getFullYear() + '-' + getMonth(now) + '-27T20:00:00',
-        //     end: now.getFullYear() + '-' + getMonth(now) + '-28T20:00:00',
-        //     className: 'success',
-        //     description: 'Sed purus urna, aliquam et pharetra ut, efficitur id mi. Pellentesque ut convallis velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        // },
-        // {
-        //     id: 10,
-        //     title: 'New Talent Event',
-        //     start: now.getFullYear() + '-' + getMonth(now, 1) + '-24T08:12:14',
-        //     end: now.getFullYear() + '-' + getMonth(now, 1) + '-27T22:20:20',
-        //     className: 'danger',
-        //     description: 'Sed purus urna, aliquam et pharetra ut, efficitur id mi. Pellentesque ut convallis velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        // },
-        // {
-        //     id: 11,
-        //     title: 'Other new',
-        //     start: now.getFullYear() + '-' + getMonth(now, -1) + '-13T08:12:14',
-        //     end: now.getFullYear() + '-' + getMonth(now, -1) + '-16T22:20:20',
-        //     className: 'primary',
-        //     description: 'Pellentesque ut convallis velit. Sed purus urna, aliquam et pharetra ut, efficitur id mi. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        // },
-        // {
-        //     id: 13,
-        //     title: 'Upcoming Event',
-        //     start: now.getFullYear() + '-' + getMonth(now, 1) + '-15T08:12:14',
-        //     end: now.getFullYear() + '-' + getMonth(now, 1) + '-18T22:20:20',
-        //     className: 'primary',
-        //     description: 'Pellentesque ut convallis velit. Sed purus urna, aliquam et pharetra ut, efficitur id mi. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        // },
-    ]);
+    const dispatch = useDispatch<AppDispatch>();
+    const { shifts, loading } = useSelector((state: IRootState) => state.getShifts);
+
+    const [events, setEvents] = useState<any[]>([]);
     const [isAddEventModal, setIsAddEventModal] = useState(false);
     const [minStartDate, setMinStartDate] = useState<any>('');
     const [minEndDate, setMinEndDate] = useState<any>('');
+    const [assignmentType, setAssignmentType] = useState<'group' | 'user'>('group');
+    const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+    const { members } = useSelector((state: IRootState) => state.members);
+
     const defaultParams = {
         id: null,
         title: '',
@@ -128,27 +45,87 @@ const ComponentsAppsCalendar = () => {
         type: 'primary',
     };
     const [params, setParams] = useState<any>(defaultParams);
+
+    // Fetch Shifts on Mount
+    useEffect(() => {
+        const month = now.toISOString().slice(0, 7); // Format: YYYY-MM
+        const userData = localStorage.getItem('user_data');
+        if (!userData) {
+            console.error('No user data found in localStorage');
+            return;
+        }
+        try {
+            const user = JSON.parse(userData);
+            if (!user?.uid) {
+                console.error('Invalid user data: missing uid');
+                return;
+            }
+            dispatch(fetchShifts({ companyId: user.business_id, month }));
+            dispatch(fetchCompanyMembers({ companyId: user.business_id, page: 1 }));
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+        }
+    }, [dispatch]);
+
+    const handleMonthChange = (arg: any) => {
+        const newDate = new Date(arg.start);
+        const month = newDate.toISOString().slice(0, 7); // YYYY-MM
+
+        const userData = localStorage.getItem('user_data');
+        if (!userData) {
+            console.error('No user data found in localStorage');
+            return;
+        }
+
+        try {
+            const user = JSON.parse(userData);
+            if (!user?.uid || !user?.business_id) {
+                console.error('Invalid user data');
+                return;
+            }
+
+            dispatch(fetchShifts({ companyId: user.business_id, month }));
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+        }
+    };
+
+    // Convert Shifts to FullCalendar Event Format
+    useEffect(() => {
+        if (shifts && shifts.length > 0) {
+            const mapped = shifts.map((shift) => ({
+                id: shift.id,
+                title: shift.title,
+                start: shift.field_shift_start_date,
+                end: shift.field_shift_end_date,
+                description: `Assigned to: ${(shift.field_users || []).map((u) => u.name).join(', ')}`,
+                className: 'primary',
+            }));
+            setEvents(mapped);
+        }
+    }, [shifts]);
+
     const dateFormat = (dt: any) => {
         dt = new Date(dt);
         const month = dt.getMonth() + 1 < 10 ? '0' + (dt.getMonth() + 1) : dt.getMonth() + 1;
         const date = dt.getDate() < 10 ? '0' + dt.getDate() : dt.getDate();
         const hours = dt.getHours() < 10 ? '0' + dt.getHours() : dt.getHours();
         const mins = dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes();
-        dt = dt.getFullYear() + '-' + month + '-' + date + 'T' + hours + ':' + mins;
-        return dt;
+        return dt.getFullYear() + '-' + month + '-' + date + 'T' + hours + ':' + mins;
     };
+
     const editEvent = (data: any = null) => {
         let params = JSON.parse(JSON.stringify(defaultParams));
         setParams(params);
         if (data) {
             let obj = JSON.parse(JSON.stringify(data.event));
             setParams({
-                id: obj.id ? obj.id : null,
-                title: obj.title ? obj.title : null,
+                id: obj.id,
+                title: obj.title,
                 start: dateFormat(obj.start),
                 end: dateFormat(obj.end),
-                type: obj.classNames ? obj.classNames[0] : 'primary',
-                description: obj.extendedProps ? obj.extendedProps.description : '',
+                type: obj.classNames?.[0] || 'primary',
+                description: obj.extendedProps?.description || '',
             });
             setMinStartDate(new Date());
             setMinEndDate(dateFormat(obj.start));
@@ -158,6 +135,7 @@ const ComponentsAppsCalendar = () => {
         }
         setIsAddEventModal(true);
     };
+
     const editDate = (data: any) => {
         let obj = {
             event: {
@@ -168,53 +146,65 @@ const ComponentsAppsCalendar = () => {
         editEvent(obj);
     };
 
-    const saveEvent = () => {
-        if (!params.title) {
-            return true;
-        }
-        if (!params.start) {
-            return true;
-        }
-        if (!params.end) {
-            return true;
-        }
-        if (params.id) {
-            //update event
-            let dataevent = events || [];
-            let event: any = dataevent.find((d: any) => d.id === parseInt(params.id));
-            event.title = params.title;
-            event.start = params.start;
-            event.end = params.end;
-            event.description = params.description;
-            event.className = params.type;
+    // const saveEvent = () => {
+    //     if (!params.title || !params.start || !params.end) return;
 
-            setEvents([]);
-            setTimeout(() => {
-                setEvents(dataevent);
-            });
-        } else {
-            //add event
-            let maxEventId = 0;
-            if (events) {
-                maxEventId = events.reduce((max: number, character: any) => (character.id > max ? character.id : max), events[0].id);
-            }
-            maxEventId = maxEventId + 1;
-            let event = {
-                id: maxEventId,
-                title: params.title,
-                start: params.start,
-                end: params.end,
-                description: params.description,
-                className: params.type,
-            };
-            let dataevent = events || [];
-            dataevent = dataevent.concat([event]);
-            setTimeout(() => {
-                setEvents(dataevent);
-            });
+    //     const newEvent = {
+    //         id: new Date().getTime().toString(),
+    //         title: params.title,
+    //         start: params.start,
+    //         end: params.end,
+    //         description: params.description,
+    //         className: params.type,
+    //     };
+
+    //     setEvents((prev) => [...prev, newEvent]);
+
+    //     showMessage('Shift added locally (not saved to backend).');
+    //     setIsAddEventModal(false);
+    // };
+
+    // create or update shift
+    const saveEvent = async () => {
+        if (!params.title || !params.start || !params.end) {
+            showMessage('Please fill in all required fields.', 'error');
+            return;
         }
-        showMessage('Event has been saved successfully.');
-        setIsAddEventModal(false);
+
+        const userData = localStorage.getItem('user_data');
+        if (!userData) {
+            showMessage('User not found', 'error');
+            return;
+        }
+
+        const user = JSON.parse(userData);
+
+        const payload: any = {
+            content_type: 'shift',
+            operation: params.id ? 'update' : 'create',
+            ...(params.id && { node_id: parseInt(params.id) }),
+            node_data: {
+                title: params.title,
+                field_company: parseInt(user.business_id),
+                field_groups: [], // you can update to actual selected groups
+                field_shift_assign_to: 'users',
+                field_shift_start_date: params.start,
+                field_shift_end_date: params.end,
+                field_users: selectedUserIds, // you can expand to multiple users
+            },
+        };
+
+        try {
+            await dispatch(createOrUpdateShift(payload)).unwrap();
+            showMessage(`Shift ${params.id ? 'updated' : 'created'} successfully.`);
+
+            const month = new Date(params.start).toISOString().slice(0, 7);
+            dispatch(fetchShifts({ companyId: user.business_id, month }));
+
+            setIsAddEventModal(false);
+        } catch (error: any) {
+            showMessage(error || 'Shift operation failed', 'error');
+        }
     };
     const startDateChange = (event: any) => {
         const dateStr = event.target.value;
@@ -241,34 +231,60 @@ const ComponentsAppsCalendar = () => {
             padding: '10px 20px',
         });
     };
+    // delete event
+    const deleteEvent = async () => {
+        if (!params.id) return;
 
+        const userData = localStorage.getItem('user_data');
+        if (!userData) {
+            showMessage('User not found', 'error');
+            return;
+        }
+
+        const user = JSON.parse(userData);
+
+        const payload = {
+            content_type: 'shift',
+            operation: "delete" as const,
+            node_id: parseInt(params.id),
+        };
+
+        try {
+            await dispatch(createOrUpdateShift(payload)).unwrap();
+            showMessage('Shift deleted successfully.');
+
+            const month = new Date(params.start).toISOString().slice(0, 7);
+            dispatch(fetchShifts({ companyId: user.business_id, month }));
+
+            setIsAddEventModal(false);
+        } catch (error: any) {
+            showMessage(error || 'Shift deletion failed', 'error');
+        }
+    };
+
+    
     return (
         <div>
             <div className="panel mb-5">
                 <div className="mb-4 flex flex-col items-center justify-center sm:flex-row sm:justify-between">
                     <div className="mb-4 sm:mb-0">
-                        <div className="text-center text-lg font-semibold ltr:sm:text-left rtl:sm:text-right">Calendar</div>
-                        {/* <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start">
-                            <div className="flex items-center ltr:mr-4 rtl:ml-4">
-                                <div className="h-2.5 w-2.5 rounded-sm bg-primary ltr:mr-2 rtl:ml-2"></div>
-                                <div>Work</div>
-                            </div>
-                            <div className="flex items-center ltr:mr-4 rtl:ml-4">
-                                <div className="h-2.5 w-2.5 rounded-sm bg-info ltr:mr-2 rtl:ml-2"></div>
-                                <div>Travel</div>
-                            </div>
-                            <div className="flex items-center ltr:mr-4 rtl:ml-4">
-                                <div className="h-2.5 w-2.5 rounded-sm bg-success ltr:mr-2 rtl:ml-2"></div>
-                                <div>Personal</div>
-                            </div>
-                            <div className="flex items-center">
-                                <div className="h-2.5 w-2.5 rounded-sm bg-danger ltr:mr-2 rtl:ml-2"></div>
-                                <div>Important</div>
-                            </div>
-                        </div> */}
+                        <div className="text-center text-lg font-semibold">Calendar</div>
+                        <div className="mt-2 flex flex-wrap justify-center sm:justify-start">
+                            {[
+                                { label: 'Assigned', color: 'bg-primary' },
+                                { label: 'Open', color: 'bg-info' },
+                                { label: 'Swap', color: 'bg-success' },
+                                { label: 'Rejected', color: 'bg-danger' },
+                            ].map((item) => (
+                                <div key={item.label} className="flex items-center mr-4">
+                                    <div className={`h-2.5 w-2.5 rounded-sm ${item.color} mr-2`}></div>
+                                    <div>{item.label}</div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                     <button type="button" className="btn btn-primary" onClick={() => editEvent()}>
-                        <IconPlus className="ltr:mr-2 rtl:ml-2" />
+                        <IconPlus className="mr-2" />
                         Create Shift
                     </button>
                 </div>
@@ -282,17 +298,16 @@ const ComponentsAppsCalendar = () => {
                             right: 'dayGridMonth,timeGridWeek,timeGridDay',
                         }}
                         editable={true}
-                        dayMaxEvents={true}
                         selectable={true}
-                        droppable={true}
                         eventClick={(event: any) => editEvent(event)}
                         select={(event: any) => editDate(event)}
                         events={events}
+                        datesSet={handleMonthChange}
                     />
                 </div>
             </div>
 
-            {/* add event modal */}
+            {/* Modal */}
             <Transition appear show={isAddEventModal} as={Fragment}>
                 <Dialog as="div" onClose={() => setIsAddEventModal(false)} open={isAddEventModal} className="relative z-50">
                     <TransitionChild
@@ -319,147 +334,72 @@ const ComponentsAppsCalendar = () => {
                                 leave-to="opacity-0 scale-95"
                             >
                                 <DialogPanel className="panel w-full max-w-lg overflow-hidden rounded-lg border-0 p-0 text-black dark:text-white-dark">
-                                    <button
-                                        type="button"
-                                        className="absolute top-4 text-gray-400 outline-none hover:text-gray-800 ltr:right-4 rtl:left-4 dark:hover:text-gray-600"
-                                        onClick={() => setIsAddEventModal(false)}
-                                    >
+                                    <button type="button" className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 dark:hover:text-gray-600" onClick={() => setIsAddEventModal(false)}>
                                         <IconX />
                                     </button>
-                                    <div className="bg-[#fbfbfb] py-3 text-lg font-medium ltr:pl-5 ltr:pr-[50px] rtl:pl-[50px] rtl:pr-5 dark:bg-[#121c2c]">
-                                        {params.id ? 'Edit Shift' : 'Add Shift'}
-                                    </div>
+                                    <div className="bg-[#fbfbfb] py-3 text-lg font-medium px-5 dark:bg-[#121c2c]">{params.id ? 'Edit Shift' : 'Add Shift'}</div>
                                     <div className="p-5">
                                         <form className="space-y-5">
                                             <div>
                                                 <label htmlFor="title">Shift Title :</label>
-                                                <input
-                                                    id="title"
-                                                    type="text"
-                                                    name="title"
-                                                    className="form-input"
-                                                    placeholder="Enter Shift Title"
-                                                    value={params.title || ''}
-                                                    onChange={(e) => changeValue(e)}
-                                                    required
-                                                />
-                                                <div className="mt-2 text-danger" id="titleErr"></div>
-                                            </div>
-
-                                            <div>
-                                                <label htmlFor="dateStart">From :</label>
-                                                <input
-                                                    id="start"
-                                                    type="datetime-local"
-                                                    name="start"
-                                                    className="form-input"
-                                                    placeholder="Event Start Date"
-                                                    value={params.start || ''}
-                                                    min={minStartDate}
-                                                    onChange={(event: any) => startDateChange(event)}
-                                                    required
-                                                />
-                                                <div className="mt-2 text-danger" id="startDateErr"></div>
+                                                <input id="title" type="text" className="form-input" value={params.title || ''} onChange={changeValue} />
                                             </div>
                                             <div>
-                                                <label htmlFor="dateEnd">To :</label>
-                                                <input
-                                                    id="end"
-                                                    type="datetime-local"
-                                                    name="end"
-                                                    className="form-input"
-                                                    placeholder="Event End Date"
-                                                    value={params.end || ''}
-                                                    min={minEndDate}
-                                                    onChange={(e) => changeValue(e)}
-                                                    required
-                                                />
-                                                <div className="mt-2 text-danger" id="endDateErr"></div>
+                                                <label htmlFor="start">From :</label>
+                                                <input id="start" type="datetime-local" className="form-input" value={params.start || ''} min={minStartDate} onChange={startDateChange} />
                                             </div>
                                             <div>
-                                                <label htmlFor="group" className="block  mb-1">
-                                                    Group:
-                                                </label>
+                                                <label htmlFor="end">To :</label>
+                                                <input id="end" type="datetime-local" className="form-input" value={params.end || ''} min={minEndDate} onChange={changeValue} />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="assignmentType">Assign To :</label>
                                                 <select
-                                                    id="group"
-                                                    name="group"
-                                                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                                    id="assignmentType"
+                                                    className="form-select mt-1"
+                                                    value={assignmentType}
+                                                    onChange={(e) => {
+                                                        setAssignmentType(e.target.value as 'group' | 'user');
+                                                        setSelectedUserIds([]);
+                                                    }}
                                                 >
-                                                    <option value="">Select Group</option>
-                                                    <option value="group1">Front Desk Team</option>
-                                                    <option value="group2">Kitchen Staff</option>
-                                                    <option value="group3">Leading Directors</option>
-                                                    <option value="group4">Senior Managers</option>
+                                                    <option value="group">Group</option>
+                                                    <option value="user">User</option>
                                                 </select>
                                             </div>
 
+                                            {assignmentType === 'user' && (
+                                                <div>
+                                                    <label>Select Users :</label>
+                                                    <Select
+                                                        isMulti
+                                                        options={members.members.map((m) => ({ value: m.uid, label: m.name }))}
+                                                        onChange={(selectedOptions) => {
+                                                            setSelectedUserIds(selectedOptions.map((opt) => opt.value));
+                                                        }}
+                                                        placeholder="Select users..."
+                                                    />
+                                                </div>
+                                            )}
+
                                             <div>
                                                 <label htmlFor="description">Shift Description :</label>
-                                                <textarea
-                                                    id="description"
-                                                    name="description"
-                                                    className="form-textarea min-h-[130px]"
-                                                    placeholder="Enter Shift Description"
-                                                    value={params.description || ''}
-                                                    onChange={(e) => changeValue(e)}
-                                                ></textarea>
+                                                <textarea id="description" className="form-textarea min-h-[130px]" value={params.description || ''} onChange={changeValue} />
                                             </div>
-                                            <div>
-                                                {/* <label>Badge:</label>
-                                                <div className="mt-3">
-                                                    <label className="inline-flex cursor-pointer ltr:mr-3 rtl:ml-3">
-                                                        <input
-                                                            type="radio"
-                                                            className="form-radio"
-                                                            name="type"
-                                                            value="primary"
-                                                            checked={params.type === 'primary'}
-                                                            onChange={(e) => setParams({ ...params, type: e.target.value })}
-                                                        />
-                                                        <span className="ltr:pl-2 rtl:pr-2">Work</span>
-                                                    </label>
-                                                    <label className="inline-flex cursor-pointer ltr:mr-3 rtl:ml-3">
-                                                        <input
-                                                            type="radio"
-                                                            className="form-radio text-info"
-                                                            name="type"
-                                                            value="info"
-                                                            checked={params.type === 'info'}
-                                                            onChange={(e) => setParams({ ...params, type: e.target.value })}
-                                                        />
-                                                        <span className="ltr:pl-2 rtl:pr-2">Travel</span>
-                                                    </label>
-                                                    <label className="inline-flex cursor-pointer ltr:mr-3 rtl:ml-3">
-                                                        <input
-                                                            type="radio"
-                                                            className="form-radio text-success"
-                                                            name="type"
-                                                            value="success"
-                                                            checked={params.type === 'success'}
-                                                            onChange={(e) => setParams({ ...params, type: e.target.value })}
-                                                        />
-                                                        <span className="ltr:pl-2 rtl:pr-2">Personal</span>
-                                                    </label>
-                                                    <label className="inline-flex cursor-pointer">
-                                                        <input
-                                                            type="radio"
-                                                            className="form-radio text-danger"
-                                                            name="type"
-                                                            value="danger"
-                                                            checked={params.type === 'danger'}
-                                                            onChange={(e) => setParams({ ...params, type: e.target.value })}
-                                                        />
-                                                        <span className="ltr:pl-2 rtl:pr-2">Important</span>
-                                                    </label>
-                                                </div> */}
-                                            </div>
-                                            <div className="!mt-8 flex items-center justify-end">
+                                            <div className="flex justify-end space-x-3">
                                                 <button type="button" className="btn btn-outline-danger" onClick={() => setIsAddEventModal(false)}>
                                                     Cancel
                                                 </button>
-                                                <button type="button" onClick={() => saveEvent()} className="btn btn-primary ltr:ml-4 rtl:mr-4">
+                                                <button type="button" onClick={saveEvent} className="btn btn-primary">
                                                     {params.id ? 'Update Shift' : 'Create Shift'}
                                                 </button>
+                                                {params.id && (
+                                                    <Popconfirm title="Are you sure you want to delete this shift?" onConfirm={deleteEvent} okText="Yes" cancelText="No">
+                                                        <button type="button" className="btn btn-outline-danger">
+                                                            Delete
+                                                        </button>
+                                                    </Popconfirm>
+                                                )}
                                             </div>
                                         </form>
                                     </div>

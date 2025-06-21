@@ -16,6 +16,7 @@ import Cookies from 'js-cookie';
 import React, { Fragment, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { AppDispatch, IRootState } from '@/store';
+import { Pagination } from 'antd';
 
 interface Contact {
     uid: number;
@@ -42,19 +43,20 @@ interface Role {
 const UserComponent: React.FC = () => {
     const [addContactModal, setAddContactModal] = useState<boolean>(false);
     const [assignRoleModal, setAssignRoleModal] = useState<boolean>(false);
+    const [currentPage, setCurrentPage] = useState<number>(1);
     const [value, setValue] = useState<'list' | 'grid'>('list');
     const userData = localStorage.getItem('user_data');
     const parsedUserData = userData ? JSON.parse(userData) : null;
     const { members } = useSelector((state: IRootState) => state.members);
     console.log('Members:', members.members);
-    
+
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
         if (parsedUserData?.business_id) {
-            dispatch(fetchCompanyMembers(parsedUserData.business_id));
+            dispatch(fetchCompanyMembers( {companyId : parsedUserData.business_id , page: currentPage} ));
         }
-    }, [dispatch, parsedUserData?.business_id]);
+    }, [dispatch, parsedUserData?.business_id , currentPage]);
 
     const [defaultParams] = useState<Params>({
         id: null,
@@ -83,12 +85,11 @@ const UserComponent: React.FC = () => {
         const fetchRoles = async () => {
             try {
                 setLoadingRoles(true);
-                
+
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/allowed_roles`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        
                     },
                 });
                 if (!response.ok) {
@@ -427,6 +428,8 @@ const UserComponent: React.FC = () => {
                     ))}
                 </div>
             )}
+            {/* pagination */}
+            <Pagination current={currentPage} total={Number(members.total)} showSizeChanger={false} pageSize={50} className="mt-4" onChange={(page) => setCurrentPage(page)} />
 
             {/* Add Contact Modal */}
             <Transition appear show={addContactModal} as={Fragment}>

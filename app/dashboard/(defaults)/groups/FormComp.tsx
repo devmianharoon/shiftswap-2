@@ -71,7 +71,7 @@ export default function FormComp({ groupToEdit, onClose }: FormCompProps) {
             }
             setCompanyId(user.business_id);
             dispatch(fetchSkills(user.business_type.tid));
-            dispatch(fetchCompanyMembers(user.business_id));
+            dispatch(fetchCompanyMembers({ companyId: user.business_id , page: 1 }));
         } catch (error) {
             console.error('Error parsing user data:', error);
         }
@@ -204,10 +204,14 @@ export default function FormComp({ groupToEdit, onClose }: FormCompProps) {
                 <textarea placeholder="Enter group description..." value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2" />
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-5">
+                 <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={onClose}>
+                    Close
+                </button>
                 <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" disabled={saveLoading}>
                     {saveLoading ? 'Saving...' : groupToEdit ? 'Update Group' : 'Create Group'}
                 </button>
+               
             </div>
         </form>
     );
