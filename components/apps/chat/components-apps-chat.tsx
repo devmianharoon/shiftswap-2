@@ -84,8 +84,8 @@ const ComponentsAppsChat = () => {
 
     // Map members to contact list format and filter out login user
     useEffect(() => {
-        if (members.length > 0) {
-            const newContactList: Contact[] = members.map((member) => ({
+        if (members.members.length > 0) {
+            const newContactList: Contact[] = members.members.map((member) => ({
                 userId: member.uid.toString(),
                 name: member.name,
                 path: member.profile || 'user-profile.jpeg',

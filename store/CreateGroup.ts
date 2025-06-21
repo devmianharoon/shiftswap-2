@@ -130,6 +130,7 @@ export const saveGroup = createAsyncThunk<
                 content_type: 'business_user_group',
                 operation: isUpdate ? 'update' : 'create',
                 node_data: payload,
+                node_id : payload.node_id || undefined, // Include node_id only for updates
                 
             },
             {
