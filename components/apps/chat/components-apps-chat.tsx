@@ -80,7 +80,7 @@ const ComponentsAppsChat = () => {
         active: true,
       });
 
-      dispatch(fetchCompanyMembers());
+      dispatch(fetchCompanyMembers({ companyId: user.business_id, page: 1 }));
       dispatch(fetchUserGroups({ companyId: user.business_id, userId: user.uid.toString() }));
     } catch (error) {
       console.error('Error parsing user data:', error);

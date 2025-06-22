@@ -14,10 +14,44 @@ const initialState: ShiftState = {
     error: null,
 };
 
-export const fetchShifts = createAsyncThunk<Shift[], FetchShiftsPayload>('shifts/fetchShifts', async ({ companyId, month, user }, { rejectWithValue }) => {
+// Define allowed roles
+export const ALLOWED_ROLES = ['business_admin', 'sub_admin', 'manager'];
+
+export const fetchShifts = createAsyncThunk<Shift[], FetchShiftsPayload>('shifts/fetchShifts', async ({ month }, { rejectWithValue }) => {
     try {
+        // Retrieve user data from local storage
+        const userDataString = localStorage.getItem('user_data');
+        if (!userDataString) {
+            return rejectWithValue('User data not found in local storage');
+        }
+
+        const userData = JSON.parse(userDataString);
+        const userRoles: string[] = userData.roles || [];
+        const hasAllowedRole = userRoles.some((role: string) => ALLOWED_ROLES.includes(role));
         const query = month ? `?month=${month}` : '';
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/company/${companyId}/shifts${query}`, user ?? null);
+
+        // Validate companyId
+        if (!userData.business_id) {
+            return rejectWithValue('Company ID not found in user data');
+        }
+
+        let payload;
+        if (hasAllowedRole) {
+            // For allowed roles, send null payload
+            payload = null;
+        } else {
+            // For other roles, send uid and skill_id
+            payload = {
+                uid: String(userData.uid) ,
+                skill_id: Array.isArray(userData.skills) ? userData.skills.map((skill: any) => skill.tid) : [],
+            };
+
+            if (!payload.uid || !payload.skill_id) {
+                return rejectWithValue('Missing uid or skill_id in user data');
+            }
+        }
+
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BE_URL}/company/${userData.business_id}/shifts${query}`, payload);
         return response.data;
     } catch (err: any) {
         return rejectWithValue(err.response?.data?.detail || 'Failed to fetch shifts');
