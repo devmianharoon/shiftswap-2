@@ -10,12 +10,13 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchShifts } from '@/store/GetShiftsSlice';
+import { ALLOWED_ROLES, fetchShifts } from '@/store/GetShiftsSlice';
 import { IRootState, AppDispatch } from '@/store';
 import { createOrUpdateShift } from '@/store/CreateOrUpdateShiftSlice';
 import Select from 'react-select';
 import { fetchCompanyMembers } from '@/store/MembersSlice';
 import { Popconfirm } from 'antd';
+import { fetchGroups } from '@/store/GetGroupSlice';
 
 const ComponentsAppsCalendar = () => {
     const now = new Date();
@@ -26,22 +27,21 @@ const ComponentsAppsCalendar = () => {
     };
 
     const dispatch = useDispatch<AppDispatch>();
-    const { shifts, loading } = useSelector((state: IRootState) => state.getShifts);
-
+    const { shifts } = useSelector((state: IRootState) => state.getShifts);
     const [events, setEvents] = useState<any[]>([]);
     const [isAddEventModal, setIsAddEventModal] = useState(false);
     const [minStartDate, setMinStartDate] = useState<any>('');
     const [minEndDate, setMinEndDate] = useState<any>('');
     const [assignmentType, setAssignmentType] = useState<'group' | 'user'>('group');
+    const [showButtoms, setShowButtoms] = useState(false);
     const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
     const { members } = useSelector((state: IRootState) => state.members);
-
+    const { data: groupData } = useSelector((state: IRootState) => state.getgroups);
     const defaultParams = {
         id: null,
         title: '',
         start: '',
         end: '',
-        description: '',
         type: 'primary',
     };
     const [params, setParams] = useState<any>(defaultParams);
@@ -60,8 +60,16 @@ const ComponentsAppsCalendar = () => {
                 console.error('Invalid user data: missing uid');
                 return;
             }
-            dispatch(fetchShifts({ companyId: user.business_id, month }));
+            const userRoles: string[] = user.roles || [];
+            const hasAllowedRole = userRoles.some((role: string) => ALLOWED_ROLES.includes(role));
+            if (hasAllowedRole) {
+                setShowButtoms(true);
+            } else {
+                setShowButtoms(false);
+            }
+            dispatch(fetchShifts({ month }));
             dispatch(fetchCompanyMembers({ companyId: user.business_id, page: 1 }));
+            dispatch(fetchGroups({ companyId: user.business_id, page: 1 }));
         } catch (error) {
             console.error('Error parsing user data:', error);
         }
@@ -84,7 +92,7 @@ const ComponentsAppsCalendar = () => {
                 return;
             }
 
-            dispatch(fetchShifts({ companyId: user.business_id, month }));
+            dispatch(fetchShifts({ month }));
         } catch (error) {
             console.error('Error parsing user data:', error);
         }
@@ -98,7 +106,6 @@ const ComponentsAppsCalendar = () => {
                 title: shift.title,
                 start: shift.field_shift_start_date,
                 end: shift.field_shift_end_date,
-                description: `Assigned to: ${(shift.field_users || []).map((u) => u.name).join(', ')}`,
                 className: 'primary',
             }));
             setEvents(mapped);
@@ -117,18 +124,34 @@ const ComponentsAppsCalendar = () => {
     const editEvent = (data: any = null) => {
         let params = JSON.parse(JSON.stringify(defaultParams));
         setParams(params);
+        setAssignmentType('group'); // Default to 'group'
+        setSelectedUserIds([]); // Reset selected IDs
+
         if (data) {
             let obj = JSON.parse(JSON.stringify(data.event));
-            setParams({
-                id: obj.id,
-                title: obj.title,
-                start: dateFormat(obj.start),
-                end: dateFormat(obj.end),
-                type: obj.classNames?.[0] || 'primary',
-                description: obj.extendedProps?.description || '',
-            });
-            setMinStartDate(new Date());
-            setMinEndDate(dateFormat(obj.start));
+            // Find the shift data from the shifts array
+            const shift = shifts.find((s) => s.id === obj.id);
+            if (shift) {
+                setParams({
+                    id: obj.id,
+                    title: obj.title,
+                    start: dateFormat(obj.start),
+                    end: dateFormat(obj.end),
+                    type: obj.classNames?.[0] || 'primary',
+                });
+                // Set assignment type and selected IDs
+                const assignTo = (shift.field_shift_assign_to as 'group' | 'user') || 'group';
+                setAssignmentType(assignTo);
+                if (assignTo === 'group' && shift.field_groups) {
+                    // Map field_groups to extract numeric IDs
+                    setSelectedUserIds(shift.field_groups.map((group: { id: string }) => parseInt(group.id)));
+                } else if (assignTo === 'user' && shift.field_users) {
+                    // Map field_users to extract numeric IDs
+                    setSelectedUserIds(shift.field_users.map((user: { id: string }) => parseInt(user.id)));
+                }
+                setMinStartDate(new Date());
+                setMinEndDate(dateFormat(obj.start));
+            }
         } else {
             setMinStartDate(new Date());
             setMinEndDate(new Date());
@@ -146,24 +169,6 @@ const ComponentsAppsCalendar = () => {
         editEvent(obj);
     };
 
-    // const saveEvent = () => {
-    //     if (!params.title || !params.start || !params.end) return;
-
-    //     const newEvent = {
-    //         id: new Date().getTime().toString(),
-    //         title: params.title,
-    //         start: params.start,
-    //         end: params.end,
-    //         description: params.description,
-    //         className: params.type,
-    //     };
-
-    //     setEvents((prev) => [...prev, newEvent]);
-
-    //     showMessage('Shift added locally (not saved to backend).');
-    //     setIsAddEventModal(false);
-    // };
-
     // create or update shift
     const saveEvent = async () => {
         if (!params.title || !params.start || !params.end) {
@@ -176,9 +181,7 @@ const ComponentsAppsCalendar = () => {
             showMessage('User not found', 'error');
             return;
         }
-
         const user = JSON.parse(userData);
-
         const payload: any = {
             content_type: 'shift',
             operation: params.id ? 'update' : 'create',
@@ -186,11 +189,11 @@ const ComponentsAppsCalendar = () => {
             node_data: {
                 title: params.title,
                 field_company: parseInt(user.business_id),
-                field_groups: [], // you can update to actual selected groups
-                field_shift_assign_to: 'users',
+                field_groups: assignmentType === 'group' ? selectedUserIds : [],
+                field_shift_assign_to: assignmentType,
                 field_shift_start_date: params.start,
                 field_shift_end_date: params.end,
-                field_users: selectedUserIds, // you can expand to multiple users
+                field_users: assignmentType === 'user' ? selectedUserIds : [], // you can expand to multiple users
             },
         };
 
@@ -199,7 +202,7 @@ const ComponentsAppsCalendar = () => {
             showMessage(`Shift ${params.id ? 'updated' : 'created'} successfully.`);
 
             const month = new Date(params.start).toISOString().slice(0, 7);
-            dispatch(fetchShifts({ companyId: user.business_id, month }));
+            dispatch(fetchShifts({ month }));
 
             setIsAddEventModal(false);
         } catch (error: any) {
@@ -234,35 +237,34 @@ const ComponentsAppsCalendar = () => {
     // delete event
     const deleteEvent = async () => {
         if (!params.id) return;
-
-        const userData = localStorage.getItem('user_data');
-        if (!userData) {
-            showMessage('User not found', 'error');
-            return;
-        }
-
-        const user = JSON.parse(userData);
-
+        const month = new Date(params.start).toISOString().slice(0, 7);
         const payload = {
             content_type: 'shift',
-            operation: "delete" as const,
+            operation: 'delete' as const,
             node_id: parseInt(params.id),
         };
-
         try {
             await dispatch(createOrUpdateShift(payload)).unwrap();
             showMessage('Shift deleted successfully.');
 
-            const month = new Date(params.start).toISOString().slice(0, 7);
-            dispatch(fetchShifts({ companyId: user.business_id, month }));
+            // ✅ Re-fetch from backend
+            const refreshed = await dispatch(fetchShifts({ month })).unwrap();
+
+            // ✅ Manually update local state from refreshed shifts
+            const mapped = refreshed.map((shift: any) => ({
+                id: shift.id,
+                title: shift.title,
+                start: shift.field_shift_start_date,
+                end: shift.field_shift_end_date,
+                className: 'primary',
+            }));
+            setEvents(mapped);
 
             setIsAddEventModal(false);
         } catch (error: any) {
             showMessage(error || 'Shift deletion failed', 'error');
         }
     };
-
-    
     return (
         <div>
             <div className="panel mb-5">
@@ -283,10 +285,12 @@ const ComponentsAppsCalendar = () => {
                             ))}
                         </div>
                     </div>
-                    <button type="button" className="btn btn-primary" onClick={() => editEvent()}>
-                        <IconPlus className="mr-2" />
-                        Create Shift
-                    </button>
+                    {showButtoms && (
+                        <button type="button" className="btn btn-primary" onClick={() => editEvent()}>
+                            <IconPlus className="mr-2" />
+                            Create Shift
+                        </button>
+                    )}
                 </div>
                 <div className="calendar-wrapper">
                     <FullCalendar
@@ -367,7 +371,6 @@ const ComponentsAppsCalendar = () => {
                                                     <option value="user">User</option>
                                                 </select>
                                             </div>
-
                                             {assignmentType === 'user' && (
                                                 <div>
                                                     <label>Select Users :</label>
@@ -377,23 +380,36 @@ const ComponentsAppsCalendar = () => {
                                                         onChange={(selectedOptions) => {
                                                             setSelectedUserIds(selectedOptions.map((opt) => opt.value));
                                                         }}
+                                                        value={members.members.filter((m) => selectedUserIds.includes(m.uid)).map((m) => ({ value: m.uid, label: m.name }))}
                                                         placeholder="Select users..."
                                                     />
                                                 </div>
                                             )}
+                                            {assignmentType === 'group' && (
+                                                <div>
+                                                    <label>Select Groups :</label>
+                                                    <Select
+                                                        isMulti
+                                                        options={groupData.groups.map((g: any) => ({ value: g.id, label: g.title }))}
+                                                        value={groupData.groups.filter((g: any) => selectedUserIds.includes(parseInt(g.id))).map((g: any) => ({ value: g.id, label: g.title }))}
+                                                        onChange={(selectedOptions) => {
+                                                            setSelectedUserIds(selectedOptions.map((opt) => parseInt(opt.value)));
+                                                        }}
+                                                        placeholder="Select groups..."
+                                                    />
+                                                </div>
+                                            )}
 
-                                            <div>
-                                                <label htmlFor="description">Shift Description :</label>
-                                                <textarea id="description" className="form-textarea min-h-[130px]" value={params.description || ''} onChange={changeValue} />
-                                            </div>
                                             <div className="flex justify-end space-x-3">
                                                 <button type="button" className="btn btn-outline-danger" onClick={() => setIsAddEventModal(false)}>
                                                     Cancel
                                                 </button>
-                                                <button type="button" onClick={saveEvent} className="btn btn-primary">
-                                                    {params.id ? 'Update Shift' : 'Create Shift'}
-                                                </button>
-                                                {params.id && (
+                                                {showButtoms && (
+                                                    <button type="button" onClick={saveEvent} className="btn btn-primary">
+                                                        {params.id ? 'Update Shift' : 'Create Shift'}
+                                                    </button>
+                                                )}
+                                                {params.id && showButtoms && (
                                                     <Popconfirm title="Are you sure you want to delete this shift?" onConfirm={deleteEvent} okText="Yes" cancelText="No">
                                                         <button type="button" className="btn btn-outline-danger">
                                                             Delete

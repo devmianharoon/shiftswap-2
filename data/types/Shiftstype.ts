@@ -29,7 +29,7 @@ export interface UserFilter {
 }
 
 export interface FetchShiftsPayload {
-    companyId: string;
+    // companyId: string;
     month?: string; // Format: YYYY-MM
-    user?: UserFilter;
+    // user?: UserFilter;
 }

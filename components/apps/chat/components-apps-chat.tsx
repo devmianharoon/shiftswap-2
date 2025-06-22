@@ -76,7 +76,7 @@ const ComponentsAppsChat = () => {
                 active: true,
             });
             console.log('Fetching members for companyId:', user.business_id);
-            dispatch(fetchCompanyMembers(user.business_id));
+            dispatch(fetchCompanyMembers({ companyId: user.business_id, page: 1 }));
         } catch (error) {
             console.error('Error parsing user data:', error);
         }

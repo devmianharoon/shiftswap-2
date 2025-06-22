@@ -7,7 +7,6 @@ import IconListCheck from '@/components/icon/icon-list-check';
 import IconSearch from '@/components/icon/icon-search';
 import IconTwitter from '@/components/icon/icon-twitter';
 import IconUser from '@/components/icon/icon-user';
-import IconUserPlus from '@/components/icon/icon-user-plus';
 import IconX from '@/components/icon/icon-x';
 import { fetchCompanyMembers } from '@/store/MembersSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -41,7 +40,6 @@ interface Role {
 }
 
 const UserComponent: React.FC = () => {
-    const [addContactModal, setAddContactModal] = useState<boolean>(false);
     const [assignRoleModal, setAssignRoleModal] = useState<boolean>(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [value, setValue] = useState<'list' | 'grid'>('list');
@@ -165,79 +163,11 @@ const UserComponent: React.FC = () => {
         }
     };
 
-    const changeValue = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { value, id } = e.target;
-        setParams({ ...params, [id]: value });
-    };
 
-    const saveUser = () => {
-        if (!params.name) {
-            showMessage('Name is required.', 'error');
-            return;
-        }
-        if (!params.email) {
-            showMessage('Email is required.', 'error');
-            return;
-        }
-        if (!params.phone) {
-            showMessage('Phone is required.', 'error');
-            return;
-        }
-        if (!params.roles) {
-            showMessage('Role is required.', 'error');
-            return;
-        }
-
-        if (params.id) {
-            // Update user
-            setFilteredItems((prev) =>
-                prev.map((user) =>
-                    user.uid === params.id
-                        ? {
-                              ...user,
-                              name: params.name,
-                              email: params.email,
-                              phone: params.phone,
-                              roles: [params.roles],
-                          }
-                        : user,
-                ),
-            );
-        } else {
-            // Add user
-            const maxUserId = filteredItems.length ? Math.max(...filteredItems.map((item) => item.uid)) : 0;
-            const newUser: Contact = {
-                uid: maxUserId + 1,
-                name: params.name,
-                email: params.email,
-                phone: params.phone,
-                roles: [params.roles],
-            };
-            setFilteredItems([newUser, ...filteredItems]);
-        }
-
-        showMessage('User has been saved successfully.');
-        setAddContactModal(false);
-    };
-
-    const editUser = (user: Contact | null = null) => {
-        const json = JSON.parse(JSON.stringify(defaultParams)) as Params;
-        setParams(json);
-        if (user) {
-            setParams({
-                id: user.uid,
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                roles: user.roles[0] || '',
-            });
-        }
-        setAddContactModal(true);
-    };
 
     const deleteUser = (user: Contact) => {
-        setFilteredItems(filteredItems.filter((d) => d.uid !== user.uid));
-        setSelectedItems(selectedItems.filter((id) => id !== user.uid));
+        // setFilteredItems(filteredItems.filter((d) => d.uid !== user.uid));
+        // setSelectedItems(selectedItems.filter((id) => id !== user.uid));
         showMessage('User has been deleted successfully.');
     };
 
@@ -274,10 +204,6 @@ const UserComponent: React.FC = () => {
                             </div>
                         )}
                         <div>
-                            <button type="button" className="btn btn-primary" onClick={() => editUser()}>
-                                <IconUserPlus className="ltr:mr-2 rtl:ml-2" />
-                                Add Contact
-                            </button>
                         </div>
                         <div>
                             <button type="button" className={`btn btn-outline-primary p-2 ${value === 'list' && 'bg-primary text-white'}`} onClick={() => setValue('list')}>
@@ -349,11 +275,11 @@ const UserComponent: React.FC = () => {
                                         </td>
                                         <td>
                                             <div className="flex items-center justify-center gap-4">
-                                                <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => editUser(member)}>
+                                                {/* <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => editUser(member)}>
                                                     Edit
-                                                </button>
+                                                </button> */}
                                                 <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => deleteUser(member)}>
-                                                    Delete
+                                                    Block 
                                                 </button>
                                                 <input type="checkbox" checked={selectedItems.includes(member.uid)} onChange={() => handleCheckboxChange(member.uid)} className="form-checkbox" />
                                             </div>
@@ -416,11 +342,11 @@ const UserComponent: React.FC = () => {
                                 </div>
                             </div>
                             <div className="absolute bottom-0 mt-6 flex w-full gap-4 p-6 ltr:left-0 rtl:right-0">
-                                <button type="button" className="btn btn-outline-primary w-1/2" onClick={() => editUser(member)}>
+                                {/* <button type="button" className="btn btn-outline-primary w-1/2" onClick={() => editUser(member)}>
                                     Edit
-                                </button>
+                                </button> */}
                                 <button type="button" className="btn btn-outline-danger w-1/2" onClick={() => deleteUser(member)}>
-                                    Delete
+                                    Block
                                 </button>
                                 <input type="checkbox" checked={selectedItems.includes(member.uid)} onChange={() => handleCheckboxChange(member.uid)} className="form-checkbox" />
                             </div>
@@ -430,69 +356,6 @@ const UserComponent: React.FC = () => {
             )}
             {/* pagination */}
             <Pagination current={currentPage} total={Number(members.total)} showSizeChanger={false} pageSize={50} className="mt-4" onChange={(page) => setCurrentPage(page)} />
-
-            {/* Add Contact Modal */}
-            <Transition appear show={addContactModal} as={Fragment}>
-                <Dialog as="div" open={addContactModal} onClose={() => setAddContactModal(false)} className="relative z-50">
-                    <TransitionChild as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-                        <div className="fixed inset-0 bg-[black]/60" />
-                    </TransitionChild>
-                    <div className="fixed inset-0 overflow-y-auto">
-                        <div className="flex min-h-full items-center justify-center px-4 py-8">
-                            <TransitionChild
-                                as={Fragment}
-                                enter="ease-out duration-300"
-                                enterFrom="opacity-0 scale-95"
-                                enterTo="opacity-100 scale-100"
-                                leave="ease-in duration-200"
-                                leaveFrom="opacity-100 scale-100"
-                                leaveTo="opacity-0 scale-95"
-                            >
-                                <DialogPanel className="panel w-full max-w-lg overflow-hidden rounded-lg border-0 p-0 text-black dark:text-white-dark">
-                                    <button
-                                        type="button"
-                                        onClick={() => setAddContactModal(false)}
-                                        className="absolute top-4 text-gray-400 outline-none hover:text-gray-800 ltr:right-4 rtl:left-4 dark:hover:text-gray-600"
-                                    >
-                                        <IconX />
-                                    </button>
-                                    <div className="bg-[#fbfbfb] py-3 text-lg font-medium ltr:pl-5 ltr:pr-[50px] rtl:pl-[50px] rtl:pr-5 dark:bg-[#121c2c]">
-                                        {params.id ? 'Edit Contact' : 'Add Contact'}
-                                    </div>
-                                    <div className="p-5">
-                                        <form>
-                                            <div className="mb-5">
-                                                <label htmlFor="name">Name</label>
-                                                <input id="name" type="text" placeholder="Enter Name" className="form-input" value={params.name} onChange={changeValue} />
-                                            </div>
-                                            <div className="mb-5">
-                                                <label htmlFor="email">Email</label>
-                                                <input id="email" type="email" placeholder="Enter Email" className="form-input" value={params.email} onChange={changeValue} />
-                                            </div>
-                                            <div className="mb-5">
-                                                <label htmlFor="number">Phone Number</label>
-                                                <input id="phone" type="text" placeholder="Enter Phone Number" className="form-input" value={params.phone} onChange={changeValue} />
-                                            </div>
-                                            <div className="mb-5">
-                                                <label htmlFor="roles">Role</label>
-                                                <input id="roles" type="text" placeholder="Enter Role" className="form-input" value={params.roles} onChange={changeValue} />
-                                            </div>
-                                            <div className="mt-8 flex items-center justify-end">
-                                                <button type="button" className="btn btn-outline-danger" onClick={() => setAddContactModal(false)}>
-                                                    Cancel
-                                                </button>
-                                                <button type="button" className="btn btn-primary ltr:ml-4 rtl:mr-4" onClick={saveUser}>
-                                                    {params.id ? 'Update' : 'Add'}
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </DialogPanel>
-                            </TransitionChild>
-                        </div>
-                    </div>
-                </Dialog>
-            </Transition>
 
             {/* Assign Role Modal */}
             <Transition appear show={assignRoleModal} as={Fragment}>
