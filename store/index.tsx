@@ -12,6 +12,7 @@ import createGroupReducer from '@/store/CreateGroup';
 import shiftReducer from '@/store/GetShiftsSlice';
 import shiftOperationReducer from '@/store/CreateOrUpdateShiftSlice';
 import rolesReducer from '@/store/RoleSlice';
+import swapReducer from '@/store/SwapSlice';
 const rootReducer = combineReducers({
     themeConfig: themeConfigSlice,
     auth: authReducer,
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
     getShifts: shiftReducer,
     createOrUpdateShift: shiftOperationReducer,
     roles: rolesReducer,
+    swap: swapReducer,
 });
 
 export const store = configureStore({

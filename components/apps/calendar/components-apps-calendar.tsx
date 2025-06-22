@@ -17,6 +17,7 @@ import Select from 'react-select';
 import { fetchCompanyMembers } from '@/store/MembersSlice';
 import { Popconfirm } from 'antd';
 import { fetchGroups } from '@/store/GetGroupSlice';
+import { createSwap } from '@/store/SwapSlice';
 
 const ComponentsAppsCalendar = () => {
     const now = new Date();
@@ -265,6 +266,41 @@ const ComponentsAppsCalendar = () => {
             showMessage(error || 'Shift deletion failed', 'error');
         }
     };
+
+    // swap event
+    const swapEvent = async () => {
+        if (!params.id) {
+            showMessage('No shift selected for swap', 'error');
+            return;
+        }
+
+        const userData = localStorage.getItem('user_data');
+        if (!userData) {
+            showMessage('User not found', 'error');
+            return;
+        }
+
+        const user = JSON.parse(userData);
+        const payload = {
+            title: ` ${params.title}`,
+            field_shift_claimed_ref: user.uid, // current user claiming the swap
+            field_shift_owner_ref: (shifts.find((s) => s.id === params.id)?.field_users?.[0]?.id ?? 0).toString(),
+            field_shift_reference: parseInt(params.id),
+            field_shift_start_date: params.start,
+            field_shift_end_date: params.end,
+            field_swap_status: ['pending'],
+        };
+        try {
+            await dispatch(createSwap(payload)).unwrap();
+            showMessage('Swap request created successfully');
+            // Optionally refresh shifts
+            const month = new Date(params.start).toISOString().slice(0, 7);
+            dispatch(fetchShifts({ month }));
+            setIsAddEventModal(false);
+        } catch (error: any) {
+            showMessage(error || 'Swap creation failed', 'error');
+        }
+    };
     return (
         <div>
             <div className="panel mb-5">
@@ -413,6 +449,13 @@ const ComponentsAppsCalendar = () => {
                                                     <Popconfirm title="Are you sure you want to delete this shift?" onConfirm={deleteEvent} okText="Yes" cancelText="No">
                                                         <button type="button" className="btn btn-outline-danger">
                                                             Delete
+                                                        </button>
+                                                    </Popconfirm>
+                                                )}
+                                                {!showButtoms && (
+                                                    <Popconfirm title="Are You Sure you want to Swap this shift?" onConfirm={swapEvent} okText="Yes" cancelText="No">
+                                                        <button type="button" className="btn btn-primary">
+                                                            Swap
                                                         </button>
                                                     </Popconfirm>
                                                 )}
