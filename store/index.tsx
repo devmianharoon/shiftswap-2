@@ -7,6 +7,7 @@ import companyMembersReducer from '@/store/MembersSlice';
 import activityReducer from '@/store/activitySlice';
 import skillsReducer from '@/store/skillsSlice';
 import groupReducer from '@/store/GetGroupSlice';
+import userGroupReducer from '@/store/UserGroupSlice';
 import deleteGroupReducer from '@/store/DeleteGroup';
 import createGroupReducer from '@/store/CreateGroup';
 import shiftReducer from '@/store/GetShiftsSlice';
@@ -31,7 +32,7 @@ const rootReducer = combineReducers({
 });
 
 export const store = configureStore({
-    reducer: rootReducer,
+  reducer: rootReducer,
 });
 
 export type IRootState = ReturnType<typeof rootReducer>;
