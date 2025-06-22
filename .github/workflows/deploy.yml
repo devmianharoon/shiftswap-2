@@ -1,0 +1,26 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy on Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run deploy script on server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "100.25.74.44"
+          username: "cloud-user"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /home/cloud-user/scripts
+            ./deploy_front.sh > log_deploy_front 2>&1
