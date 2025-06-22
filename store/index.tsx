@@ -14,6 +14,7 @@ import shiftReducer from '@/store/GetShiftsSlice';
 import shiftOperationReducer from '@/store/CreateOrUpdateShiftSlice';
 import rolesReducer from '@/store/RoleSlice';
 import swapReducer from '@/store/SwapSlice';
+ 
 const rootReducer = combineReducers({
     themeConfig: themeConfigSlice,
     auth: authReducer,
@@ -29,6 +30,7 @@ const rootReducer = combineReducers({
     createOrUpdateShift: shiftOperationReducer,
     roles: rolesReducer,
     swap: swapReducer,
+    userGroups: userGroupReducer,
 });
 
 export const store = configureStore({
